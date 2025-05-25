@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Rotated Minimal Game</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.10.0/p5.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.10.0/addons/p5.sound.min.js"></script>
+  <style>
+    body { margin: 0; padding: 0; overflow: hidden; background: #87ceeb; }
+    canvas { display: block; margin: auto; }
+  </style>
+</head>
+<body>
+<script>
+let bird, pipes = [];
+let pipeGap = 150;
+let pipeMin = 50;
+let score = 0, lastScore = 0, scoreFlashTimer = 0, gameOver = false;
+let kaChing;
+let prevtime = Date.now();
+let currenttime = Date.now();
+let fps = 60;
+let moveLeft = false;
+let moveRight = false;
+
+function preload() {
+  soundFormats('mp3', 'wav', 'ogg');
+  kaChing = loadSound('https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg');
+}
+
+function setup() {
+  createCanvas(600, 600);
+  userStartAudio();
+  resetGame();
+}
+
+function resetGame() {
+  bird = new Bird();
+  pipes = [];//new Pipe()];
+  score = 0;
+  lastScore = 0;
+  prevtime = Date.now();
+  scoreFlashTimer = 0;
+  frameCount = 0;
+
+  gameOver = false;
+  loop();
+}
+
+function draw() {
+  background('#87ce00');
+
+  if (moveLeft) bird.move(-5);
+  if (moveRight) bird.move(5);
+
+  for (let i = pipes.length - 1; i >= 0; i--) {
+    pipes[i].update();
+    pipes[i].show();
+
+    if (pipes[i].hits(bird)) {
+      noLoop();
+      if (!gameOver) {
+        gameOver = true;
+        setTimeout(() => {
+          if (confirm("Game Over! Your score was: " + score + "\nPlay again?")) {
+            resetGame();
+          }
+        }, 100);
+      }
+    }
+
+    if (pipes[i].offscreen()) {
+      score++;
+      pipes.splice(i, 1);
+    }
+  }
+
+  if (score > lastScore) {
+    scoreFlashTimer = 15;
+    lastScore = score;
+    if (kaChing && kaChing.isLoaded()) {
+      kaChing.setVolume(0.13);
+      kaChing.play();
+    }
+  }
+
+  bird.update();
+  bird.show();
+
+  if (frameCount % 130 == 0) {
+    pipes.push(new Pipe());
+  }
+
+  push();
+  fill(255);
+  noStroke();
+  textSize(20);
+  text("Frame: " + frameCount, 10, 550);
+  if (frameCount % 50 == 0) {
+    currenttime = Date.now();
+    fps = Math.floor(50 / (currenttime - prevtime) * 1000);
+    prevtime = currenttime;
+  }
+  text("FPS: " + fps, 10, 580);
+  textSize(42);
+  text("Score: ", 10, 40);
+  if (scoreFlashTimer > 0) {
+    fill(255, 255, 0);
+    textSize(42 + scoreFlashTimer);
+    scoreFlashTimer--;
+  } else {
+    fill(255);
+    textSize(42);
+  }
+  text(score, 150, 40);
+  pop();
+}
+
+function keyPressed() {
+  if (keyCode === LEFT_ARROW) moveLeft = true;
+  else if (keyCode === RIGHT_ARROW) moveRight = true;
+}
+
+function keyReleased() {
+  if (keyCode === LEFT_ARROW) moveLeft = false;
+  else if (keyCode === RIGHT_ARROW) moveRight = false;
+}
+
+class Bird {
+  constructor() {
+    this.x = width / 2;
+    this.y = height - 30;
+    this.size = 32;
+  }
+
+  move(dx) {
+    this.x += dx;
+    this.x = constrain(this.x, this.size / 2, width - this.size / 2);
+  }
+
+  update() {}
+
+  show() {
+    fill(255, 50, 50);
+    stroke(255);
+    ellipse(this.x, this.y, this.size, this.size);
+  }
+}
+
+class Pipe {
+  constructor() {
+    this.w = random(pipeMin, width - pipeGap - pipeMin);
+    this.gap = pipeGap;
+    this.y = 0;
+    this.h = 40;
+    this.speed = 2;
+  }
+
+  hits(bird) {
+    const topY = this.y;
+    const botY = this.y + this.h;
+    const left1 = 0;
+    const right1 = this.w;
+    const left2 = this.w + this.gap;
+    const right2 = width;
+
+    const bx = bird.x;
+    const by = bird.y;
+    const r = bird.size / 2;
+
+    const hitLeft = bx + r > left1 && bx - r < right1 && by + r > topY && by - r < botY;
+    const hitRight = bx + r > left2 && bx - r < right2 && by + r > topY && by - r < botY;
+
+    return hitLeft || hitRight;
+  }
+
+  offscreen() {
+    return this.y > height;
+  }
+
+  update() {
+    this.y += this.speed;
+  }
+
+  show() {
+    fill(34, 139, 34);
+    noStroke();
+    rect(0, this.y, this.w, this.h);
+    rect(this.w + this.gap, this.y, width - this.w - this.gap, this.h);
+  }
+}
+</script>
+</body>
+</html>
