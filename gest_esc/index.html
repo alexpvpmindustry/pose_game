@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pose-Controlled Bird Game</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.10.0/p5.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.10.0/addons/p5.sound.min.js"></script>
+  <script src="https://unpkg.com/ml5@1/dist/ml5.min.js"></script>
+  <style>
+    body { 
+      margin: 0; 
+      padding: 0; 
+      overflow: hidden; 
+      background: #87ceeb; 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      height: 100vh;
+      font-family: Arial, sans-serif;
+    }
+    canvas { display: block; }
+    .instructions {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: white;
+      background: rgba(0,0,0,0.7);
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 14px;
+      z-index: 100;
+    }
+    .camera-status {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      color: white;
+      background: rgba(0,0,0,0.7);
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="instructions">
+    <div>Move your head left/right to control the bird!</div>
+    <div>Allow camera access to start playing</div>
+  </div>
+  <div class="camera-status" id="cameraStatus">Initializing camera...</div>
+
+<script>
+// Game variables
+let bird, pipes = [];
+let pipeGap = 150;
+let pipeMin = 50;
+let score = 0, lastScore = 0, scoreFlashTimer = 0, gameOver = false;
+let kaChing;
+let prevtime = Date.now();
+let currenttime = Date.now();
+let fps = 60;
+let fixedWidth = 800;
+let fixedHeight = 600;
+
+// Pose detection variables
+let video;
+let bodyPose;
+let poses = [];
+let noseX = 0;
+let previousNoseX = 0;
+let cameraReady = false;
+let poseDetected = false;
+
+// Control smoothing
+let smoothedNoseX = 0;
+let smoothingFactor = 0.3;
+
+function preload() {
+  soundFormats('mp3', 'wav', 'ogg');
+  kaChing = loadSound('https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg');
+  
+  // Initialize MoveNet model
+  bodyPose = ml5.bodyPose("MoveNet", {
+    flipped: true,
+  });
+}
+
+function setup() {
+  createCanvas(fixedWidth, fixedHeight);
+  
+  // Setup video capture
+  video = createCapture(VIDEO, { flipped: true });
+  video.size(160, 120); // Small video for performance
+  video.hide();
+  
+  // Setup pose detection
+  bodyPose.detectStart(video, gotPoses);
+  
+  // Initialize game
+  resetGame();
+  
+  // Update camera status
+  setTimeout(() => {
+    cameraReady = true;
+    document.getElementById('cameraStatus').textContent = 'Camera ready - Move your head!';
+  }, 2000);
+}
+
+function gotPoses(results) {
+  poses = results;
+  if (poses.length > 0) {
+    poseDetected = true;
+    let pose = poses[0];
+    if (pose.nose && pose.nose.confidence > 0.3) {
+      // Map nose position from video coordinates to game coordinates
+      noseX = map(pose.nose.x, 0, video.width, 0, width);
+      
+      // Smooth the movement
+      smoothedNoseX = lerp(smoothedNoseX, noseX, smoothingFactor);
+      
+      document.getElementById('cameraStatus').textContent = 'Pose detected - Head control active!';
+    }
+  } else {
+    poseDetected = false;
+    document.getElementById('cameraStatus').textContent = 'No pose detected - Move into camera view';
+  }
+}
+
+function resetGame() {
+  bird = new Bird();
+  pipes = [];
+  score = 0;
+  lastScore = 0;
+  prevtime = Date.now();
+  scoreFlashTimer = 0;
+  frameCount = 0;
+  gameOver = false;
+  smoothedNoseX = width / 2;
+  loop();
+}
+
+function draw() {
+  background('#87ce00');
+  
+  // Draw small video preview in corner (optional)
+  if (video && cameraReady) {
+    push();
+    tint(255, 100); // Make it semi-transparent
+    image(video, width - 160 - 10, height - 120 - 10, 160, 120);
+    
+    // Draw nose indicator on video preview
+    if (poses.length > 0 && poses[0].nose) {
+      fill(255, 0, 0);
+      noStroke();
+      let previewNoseX = map(poses[0].nose.x, 0, video.width, width - 160 - 10, width - 10);
+      let previewNoseY = map(poses[0].nose.y, 0, video.height, height - 120 - 10, height - 10);
+      circle(previewNoseX, previewNoseY, 8);
+    }
+    pop();
+  }
+
+  // Update bird position based on nose position
+  if (poseDetected && poses.length > 0) {
+    bird.setTargetX(smoothedNoseX);
+  }
+
+  // Game logic
+  for (let i = pipes.length - 1; i >= 0; i--) {
+    pipes[i].update();
+    pipes[i].show();
+
+    if (pipes[i].hits(bird)) {
+      noLoop();
+      if (!gameOver) {
+        gameOver = true;
+        setTimeout(() => {
+          if (confirm("Game Over! Your score was: " + score + "\nPlay again?")) {
+            resetGame();
+          }
+        }, 100);
+      }
+    }
+
+    if (pipes[i].offscreen()) {
+      score++;
+      pipes.splice(i, 1);
+    }
+  }
+
+  if (score > lastScore) {
+    scoreFlashTimer = 15;
+    lastScore = score;
+    if (kaChing && kaChing.isLoaded()) {
+      kaChing.setVolume(0.13);
+      kaChing.play();
+    }
+  }
+
+  bird.update();
+  bird.show();
+
+  if (frameCount % 130 == 0) {
+    pipes.push(new Pipe());
+  }
+
+  // UI
+  push();
+  fill(255);
+  noStroke();
+  textSize(16);
+  text("Frame: " + frameCount, 10, height - 60);
+  if (frameCount % 50 == 0) {
+    currenttime = Date.now();
+    fps = Math.floor(50 / (currenttime - prevtime) * 1000);
+    prevtime = currenttime;
+  }
+  text("FPS: " + fps, 10, height - 40);
+  
+  // Show pose status
+  if (poseDetected) {
+    fill(0, 255, 0);
+    text("Pose: DETECTED", 10, height - 20);
+  } else {
+    fill(255, 0, 0);
+    text("Pose: NOT DETECTED", 10, height - 20);
+  }
+
+  textSize(32);
+  fill(255);
+  text("Score: ", 10, 40);
+  if (scoreFlashTimer > 0) {
+    fill(255, 255, 0);
+    textSize(32 + scoreFlashTimer);
+    scoreFlashTimer--;
+  } else {
+    fill(255);
+    textSize(32);
+  }
+  text(score, 130, 40);
+  pop();
+}
+
+// Fallback keyboard controls
+function keyPressed() {
+  if (key === 'r' || key === 'R') {
+    resetGame();
+  }
+}
+
+class Bird {
+  constructor() {
+    this.x = width / 2;
+    this.y = height - 30;
+    this.targetX = width / 2;
+    this.size = 32;
+    this.speed = 8;
+  }
+
+  setTargetX(tx) {
+    this.targetX = constrain(tx, this.size / 2, width - this.size / 2);
+  }
+
+  update() {
+    // Smooth movement towards target position
+    this.x = lerp(this.x, this.targetX, 0.2);
+  }
+
+  show() {
+    fill(255, 50, 50);
+    stroke(255);
+    strokeWeight(2);
+    ellipse(this.x, this.y, this.size, this.size);
+    
+    // Draw eyes
+    fill(255);
+    noStroke();
+    ellipse(this.x - 6, this.y - 4, 8, 8);
+    ellipse(this.x + 6, this.y - 4, 8, 8);
+    fill(0);
+    ellipse(this.x - 6, this.y - 4, 4, 4);
+    ellipse(this.x + 6, this.y - 4, 4, 4);
+  }
+}
+
+class Pipe {
+  constructor() {
+    this.w = random(pipeMin, width - pipeGap - pipeMin);
+    this.gap = pipeGap;
+    this.y = 0;
+    this.h = 40;
+    this.speed = 2;
+  }
+
+  hits(bird) {
+    const topY = this.y;
+    const botY = this.y + this.h;
+    const left1 = 0;
+    const right1 = this.w;
+    const left2 = this.w + this.gap;
+    const right2 = width;
+
+    const bx = bird.x;
+    const by = bird.y;
+    const r = bird.size / 2;
+
+    const hitLeft = bx + r > left1 && bx - r < right1 && by + r > topY && by - r < botY;
+    const hitRight = bx + r > left2 && bx - r < right2 && by + r > topY && by - r < botY;
+
+    return hitLeft || hitRight;
+  }
+
+  offscreen() {
+    return this.y > height;
+  }
+
+  update() {
+    this.y += this.speed;
+  }
+
+  show() {
+    fill(34, 139, 34);
+    stroke(0, 100, 0);
+    strokeWeight(2);
+    rect(0, this.y, this.w, this.h);
+    rect(this.w + this.gap, this.y, width - this.w - this.gap, this.h);
+  }
+}
+</script>
+</body>
+</html>
