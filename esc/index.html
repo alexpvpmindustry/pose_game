@@ -1,13 +1,14 @@
+
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Rotated Minimal Game</title>
+  <title>Fixed Aspect Game</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.10.0/p5.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.10.0/addons/p5.sound.min.js"></script>
   <style>
-    body { margin: 0; padding: 0; overflow: hidden; background: #87ceeb; }
-    canvas { display: block; margin: auto; }
+    body { margin: 0; padding: 0; overflow: hidden; background: #87ceeb; display: flex; justify-content: center; align-items: center; height: 100%; }
+    canvas { display: block; }
   </style>
 </head>
 <body>
@@ -22,14 +23,34 @@ let currenttime = Date.now();
 let fps = 60;
 let moveLeft = false;
 let moveRight = false;
+let fixedWidth = 350;
+let fixedHeight = 500;
 
 function preload() {
   soundFormats('mp3', 'wav', 'ogg');
   kaChing = loadSound('https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg');
 }
+function calculateCanvasSize() {
+  const ratio = 0.7;
+  let w = windowWidth;
+  let h = windowHeight;
+
+  if (w / h > ratio) {
+    h = windowHeight;
+    w = h * ratio;
+  } else {
+    w = windowWidth;
+    h = w / ratio;
+  }
+
+  return { w, h };
+}
 
 function setup() {
-  createCanvas(600, 600);
+  const { w, h } = calculateCanvasSize();
+  fixedWidth = w;
+  fixedHeight =h;
+  createCanvas(w, h);
   userStartAudio();
   resetGame();
 }
@@ -90,28 +111,31 @@ function draw() {
     pipes.push(new Pipe());
   }
 
+  let scaleFactor = width < 400 ? 1.3 : 1;
+
   push();
   fill(255);
   noStroke();
-  textSize(20);
-  text("Frame: " + frameCount, 10, 550);
+  textSize(16 * scaleFactor);
+  text("Frame: " + frameCount, 10, height - 40);
   if (frameCount % 50 == 0) {
     currenttime = Date.now();
     fps = Math.floor(50 / (currenttime - prevtime) * 1000);
     prevtime = currenttime;
   }
-  text("FPS: " + fps, 10, 580);
-  textSize(42);
+  text("FPS: " + fps, 10, height - 20);
+
+  textSize(32 * scaleFactor);
   text("Score: ", 10, 40);
   if (scoreFlashTimer > 0) {
     fill(255, 255, 0);
-    textSize(42 + scoreFlashTimer);
+    textSize((32 + scoreFlashTimer) * scaleFactor);
     scoreFlashTimer--;
   } else {
     fill(255);
-    textSize(42);
+    textSize(32 * scaleFactor);
   }
-  text(score, 150, 40);
+  text(score, 130, 40);
   pop();
 }
 
@@ -125,7 +149,6 @@ function keyReleased() {
   else if (keyCode === RIGHT_ARROW) moveRight = false;
 }
 
-// Touch and mouse input handling
 function touchStarted() {
   handleInput(mouseX, true);
   return false;
