@@ -34,7 +34,6 @@ function calculateCanvasSize() {
   const ratio = 0.7;
   let w = windowWidth;
   let h = windowHeight;
-
   if (w / h > ratio) {
     h = windowHeight;
     w = h * ratio;
@@ -48,6 +47,7 @@ function calculateCanvasSize() {
 
 function setup() {
   const { w, h } = calculateCanvasSize();
+  alert("w and h:"+w+" "+h);
   fixedWidth = w;
   fixedHeight =h;
   createCanvas(w, h);
