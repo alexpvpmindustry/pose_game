@@ -16,11 +16,26 @@ let pipes = [];
 let spacing = 150, topBotMin = 50; 
 let prevtime = Date.now();
 let currenttime = Date.now();
-let fps=60;
+let fps = 60;
+let score = 0;
+let lastScore = 0;
+let scoreFlashTimer = 0;
+let gameOver = false;
+
 function setup() {
   createCanvas(600, 600);
+  resetGame();
+}
+
+function resetGame() {
   bird = new Bird();
-  pipes.push(new Pipe());
+  pipes = [new Pipe()];
+  score = 0;
+  lastScore = 0;
+  scoreFlashTimer = 0;
+  frameCount = 0;
+  loop();
+  gameOver = false;
 }
 
 function draw() {
@@ -32,11 +47,25 @@ function draw() {
 
     if (pipes[i].hits(bird)) {
       noLoop();
+      if (!gameOver) {
+        gameOver = true;
+        setTimeout(() => {
+          if (confirm("Game Over! Your score was: " + score + "\nPlay again?")) {
+            resetGame();
+          }
+        }, 100);
+      }
     }
 
     if (pipes[i].offscreen()) {
+      score += 1;
       pipes.splice(i, 1);
     }
+  }
+
+  if (score > lastScore) {
+    scoreFlashTimer = 15;
+    lastScore = score;
   }
 
   bird.update();
@@ -45,20 +74,32 @@ function draw() {
   if (frameCount % 130 == 0) {
     pipes.push(new Pipe());
   } 
+
   push();
-  fill(255); // text colour (white)
-    noStroke(); // no outline (optional)
-    textSize(16); // font size
-    text("Frame: " + frameCount, 10, 20); // message at (x=10, y=20)
-    //text("Pose len: " + poses.length, 10, 40);
-    //text("w hh " + width+height, 10, 60);
-    if (frameCount%50==0){
-        currenttime = Date.now() ;
-        fps = Math.floor( 50/(currenttime - prevtime)*1000 );
-        prevtime = currenttime;
-    }
-    text("FPS: " + fps, 10, 40);
-    pop();
+  fill(255);
+  noStroke();
+  textSize(20);
+  text("Frame: " + frameCount, 450, 550);
+  if (frameCount % 50 == 0) {
+    currenttime = Date.now();
+    fps = Math.floor(50 / (currenttime - prevtime) * 1000);
+    prevtime = currenttime;
+  }
+  text("FPS: " + fps, 450, 580);
+  fill(255);
+  textSize(42);
+  text("Score: ", 10, 40);
+  // Score animation
+  if (scoreFlashTimer > 0) {
+    fill(235, 235, 0); // gold
+    textSize(42 + scoreFlashTimer);
+    scoreFlashTimer--;
+  } else {
+    fill(255);
+    textSize(42);
+  }
+  text(score, 150, 40);
+  pop();
 }
 
 function keyPressed() {
@@ -77,7 +118,7 @@ function touchStarted() {
 class Bird {
   constructor() {
     this.y = height / 2;
-    this.x = 64;
+    this.x = 30;
     this.velocity = 0;
   }
 
