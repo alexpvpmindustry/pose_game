@@ -46,8 +46,12 @@ function calculateCanvasSize() {
 }
 
 function setup() {
-  const { w, h } = calculateCanvasSize();
-  alert("w and h:"+w+" "+h);
+  let { w, h } = calculateCanvasSize();
+  //alert("w and h:"+w+" "+h);
+  if (w>600){
+    w=600;
+    h=857;
+  }
   fixedWidth = w;
   fixedHeight =h;
   createCanvas(w, h);
