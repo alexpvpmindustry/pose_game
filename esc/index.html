@@ -36,13 +36,12 @@ function setup() {
 
 function resetGame() {
   bird = new Bird();
-  pipes = [];//new Pipe()];
+  pipes = [];
   score = 0;
   lastScore = 0;
   prevtime = Date.now();
   scoreFlashTimer = 0;
   frameCount = 0;
-
   gameOver = false;
   loop();
 }
@@ -124,6 +123,35 @@ function keyPressed() {
 function keyReleased() {
   if (keyCode === LEFT_ARROW) moveLeft = false;
   else if (keyCode === RIGHT_ARROW) moveRight = false;
+}
+
+// Touch and mouse input handling
+function touchStarted() {
+  handleInput(mouseX, true);
+  return false;
+}
+
+function touchEnded() {
+  moveLeft = moveRight = false;
+  return false;
+}
+
+function mousePressed() {
+  handleInput(mouseX, true);
+}
+
+function mouseReleased() {
+  moveLeft = moveRight = false;
+}
+
+function handleInput(x, isPressed) {
+  if (x < width / 2) {
+    moveLeft = isPressed;
+    moveRight = false;
+  } else {
+    moveRight = isPressed;
+    moveLeft = false;
+  }
 }
 
 class Bird {
