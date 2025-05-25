@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Minimal Angry Bird</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.10.0/p5.min.js"></script>
+  <style>
+    body { margin: 0; padding: 0; overflow: hidden; background: #87ceeb; }
+    canvas { display: block; margin: auto; }
+  </style>
+</head>
+<body>
+<script>
+let bird, gravity = 0.5, lift = -14;
+let pipes = [];
+let spacing = 150, topBotMin = 50;
+let framecount =0;
+function setup() {
+  createCanvas(600, 600);
+  bird = new Bird();
+  pipes.push(new Pipe());
+}
+
+function draw() {
+  background('#87ce00');
+
+  for (let i = pipes.length - 1; i >= 0; i--) {
+    pipes[i].update();
+    pipes[i].show();
+
+    if (pipes[i].hits(bird)) {
+      noLoop();
+    }
+
+    if (pipes[i].offscreen()) {
+      pipes.splice(i, 1);
+    }
+  }
+
+  bird.update();
+  bird.show();
+
+  if (frameCount % 130 == 0) {
+    pipes.push(new Pipe());
+  }
+  framecount = framecount +1;
+    text("Frame: " + framecount, 10, 20); // message at (x=10, y=20)
+    //text("Pose len: " + poses.length, 10, 40);
+    text("w hh " + width+height, 10, 60);
+}
+
+function keyPressed() {
+  if (key == ' ' || key == 'ArrowUp') bird.up();
+}
+
+function mousePressed() {
+  bird.up(); 
+}
+
+function touchStarted() {
+  bird.up();
+  return false;
+}
+
+class Bird {
+  constructor() {
+    this.y = height / 2;
+    this.x = 64;
+    this.velocity = 0;
+  }
+
+  up() {
+    this.velocity += lift;
+  }
+
+  update() {
+    this.velocity += gravity;
+    this.velocity *= 0.9;
+    this.y += this.velocity;
+    this.y = constrain(this.y, 0, height);
+  }
+
+  show() {
+    fill(255, 50, 50);
+    stroke(255);
+    ellipse(this.x, this.y, 32, 32);
+  }
+}
+
+class Pipe {
+  constructor() {
+    this.top = random(topBotMin, height - spacing - topBotMin);
+    this.bottom = height - this.top - spacing;
+    this.x = width;
+    this.w = 40;
+    this.speed = 2;
+  }
+
+  hits(bird) {
+    return (bird.y < this.top || bird.y > height - this.bottom) &&
+           bird.x > this.x && bird.x < this.x + this.w;
+  }
+
+  offscreen() {
+    return this.x + this.w < 0;
+  }
+
+  update() {
+    this.x -= this.speed;
+  }
+
+  show() {
+    fill(34, 139, 34);
+    noStroke();
+    rect(this.x, 0, this.w, this.top);
+    rect(this.x, height - this.bottom, this.w, this.bottom);
+  }
+}
+</script>
+</body>
+</html>
