@@ -8,3 +8,5 @@ hello
 
 [left right esc](https://alexpvpmindustry.github.io/pose_game/esc/index.html)
 
+[left right nose gest](https://alexpvpmindustry.github.io/pose_game/gest_esc/index.html)
+
