@@ -13,8 +13,10 @@
 <script>
 let bird, gravity = 0.5, lift = -14;
 let pipes = [];
-let spacing = 150, topBotMin = 50;
-let framecount =0;
+let spacing = 150, topBotMin = 50; 
+let prevtime = Date.now();
+let currenttime = Date.now();
+let fps=60;
 function setup() {
   createCanvas(600, 600);
   bird = new Bird();
@@ -42,11 +44,21 @@ function draw() {
 
   if (frameCount % 130 == 0) {
     pipes.push(new Pipe());
-  }
-  framecount = framecount +1;
-    text("Frame: " + framecount, 10, 20); // message at (x=10, y=20)
+  } 
+  push();
+  fill(255); // text colour (white)
+    noStroke(); // no outline (optional)
+    textSize(16); // font size
+    text("Frame: " + frameCount, 10, 20); // message at (x=10, y=20)
     //text("Pose len: " + poses.length, 10, 40);
-    text("w hh " + width+height, 10, 60);
+    //text("w hh " + width+height, 10, 60);
+    if (frameCount%50==0){
+        currenttime = Date.now() ;
+        fps = Math.floor( 50/(currenttime - prevtime)*1000 );
+        prevtime = currenttime;
+    }
+    text("FPS: " + fps, 10, 40);
+    pop();
 }
 
 function keyPressed() {
