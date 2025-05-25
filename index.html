@@ -53,7 +53,14 @@
                 // Ensure at least one pose is detected before proceeding
                 if (poses.length > 0) {
                     let pose = poses[0];
-
+                    // Draw a circle at the detected left wrist position
+                    fill(236, 100, 90);
+                    noStroke();
+                    circle(pose.left_wrist.x, pose.left_wrist.y, 30);
+                    // Draw a circle at the detected right wrist position
+                    fill(236, 100, 90);
+                    noStroke();
+                    circle(pose.right_wrist.x, pose.right_wrist.y, 30);
                     // Draw a circle at the detected nose position
                     fill(236, 1, 90);
                     noStroke();
