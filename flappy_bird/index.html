@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Minimal Angry Bird</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.10.0/p5.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.10.0/addons/p5.sound.min.js"></script>
   <style>
     body { margin: 0; padding: 0; overflow: hidden; background: #87ceeb; }
     canvas { display: block; margin: auto; }
@@ -21,9 +22,16 @@ let score = 0;
 let lastScore = 0;
 let scoreFlashTimer = 0;
 let gameOver = false;
+let kaChing;
+
+function preload() {
+  soundFormats('mp3', 'wav', 'ogg');
+  kaChing = loadSound('https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg');
+}
 
 function setup() {
   createCanvas(600, 600);
+  userStartAudio();
   resetGame();
 }
 
@@ -66,6 +74,10 @@ function draw() {
   if (score > lastScore) {
     scoreFlashTimer = 15;
     lastScore = score;
+    if (kaChing && kaChing.isLoaded()) {
+    kaChing.setVolume(0.3);
+    kaChing.play();
+    }
   }
 
   bird.update();
@@ -79,26 +91,24 @@ function draw() {
   fill(255);
   noStroke();
   textSize(20);
-  text("Frame: " + frameCount, 450, 550);
+  text("Frame: " + frameCount, 10, 550);
   if (frameCount % 50 == 0) {
     currenttime = Date.now();
     fps = Math.floor(50 / (currenttime - prevtime) * 1000);
     prevtime = currenttime;
   }
-  text("FPS: " + fps, 450, 580);
-  fill(255);
-  textSize(42);
-  text("Score: ", 10, 40);
+  text("FPS: " + fps, 10, 580);
+
   // Score animation
   if (scoreFlashTimer > 0) {
-    fill(235, 235, 0); // gold
+    fill(255, 255, 0); // gold
     textSize(42 + scoreFlashTimer);
     scoreFlashTimer--;
   } else {
     fill(255);
     textSize(42);
   }
-  text(score, 150, 40);
+  text("Score: " + score, 10, 40);
   pop();
 }
 
