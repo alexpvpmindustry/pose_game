@@ -27,7 +27,7 @@
       background: rgba(0,0,0,0.7);
       padding: 10px;
       border-radius: 5px;
-      font-size: 14px;
+      font-size: 24px;
       z-index: 100;
     }
     .camera-status {
@@ -38,7 +38,7 @@
       background: rgba(0,0,0,0.7);
       padding: 5px 10px;
       border-radius: 5px;
-      font-size: 12px;
+      font-size: 32px;
     }
   </style>
 </head>
@@ -237,7 +237,7 @@ function draw() {
     scoreFlashTimer = 15;
     lastScore = score;
     if (kaChing && kaChing.isLoaded()) {
-      kaChing.setVolume(0.13);
+      kaChing.setVolume(0.33);
       kaChing.play();
     }
   }
@@ -253,7 +253,7 @@ function draw() {
   push();
   fill(255);
   noStroke();
-  textSize(16);
+  textSize(36);
   text("Frame: " + frameCount, 10, height - 80);
   if (frameCount % 50 == 0) {
     currenttime = Date.now();
