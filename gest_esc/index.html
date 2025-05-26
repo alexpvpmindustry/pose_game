@@ -27,7 +27,7 @@
       background: rgba(0,0,0,0.7);
       padding: 10px;
       border-radius: 5px;
-      font-size: 14px;
+      font-size: 30px;
       z-index: 100;
     }
     .camera-status {
@@ -38,7 +38,7 @@
       background: rgba(0,0,0,0.7);
       padding: 5px 10px;
       border-radius: 5px;
-      font-size: 12px;
+      font-size: 25px;
     }
   </style>
 </head>
@@ -207,7 +207,7 @@ function draw() {
   push();
   fill(255);
   noStroke();
-  textSize(16);
+  textSize(20);
   text("Frame: " + frameCount, 10, height - 60);
   if (frameCount % 50 == 0) {
     currenttime = Date.now();
@@ -225,18 +225,18 @@ function draw() {
     text("Pose: NOT DETECTED", 10, height - 20);
   }
 
-  textSize(32);
+  textSize(42);
   fill(255);
   text("Score: ", 10, 40);
   if (scoreFlashTimer > 0) {
     fill(255, 255, 0);
-    textSize(32 + scoreFlashTimer);
+    textSize(42 + scoreFlashTimer);
     scoreFlashTimer--;
   } else {
     fill(255);
-    textSize(32);
+    textSize(42);
   }
-  text(score, 130, 40);
+  text(score, 150, 40);
   pop();
 }
 
