@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hand-Controlled Bird Game</title>
+  <script src="p5.min.js"></script>
+  <script src="p5.sound.min.js"></script>
+  <script src="ml5.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #87ceeb;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: Arial, sans-serif;
+    }
+    canvas { display: block; }
+    .instructions {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: white;
+      background: rgba(0,0,0,0.7);
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 24px;
+      z-index: 100;
+    }
+    .camera-status {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      color: white;
+      background: rgba(0,0,0,0.7);
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 32px;
+    }
+  </style>
+</head>
+<body>
+  <div class="instructions">
+    <div>Hold up your hand and move it left/right to control the bird!</div>
+    <div>Allow camera access to start playing</div>
+  </div>
+  <div class="camera-status" id="cameraStatus">Initializing camera...</div>
+
+<script>
+let bird, pipes = [];
+let pipeGap = 280, pipeMin = 50;
+let score = 0, lastScore = 0, scoreFlashTimer = 0, gameOver = false;
+let kaChing, gameOverSound;
+let prevtime = Date.now(), currenttime = Date.now();
+let fps = 60;
+let fixedWidth = 800, fixedHeight = 600;
+
+let video, handPose, hands = [];
+let handX = 0, smoothedHandX = 0;
+let cameraReady = false, handDetected = false;
+let smoothingFactor = 0.25;
+let gameOverTime = null;
+const palmIndices = [0, 1, 5, 9, 13, 17];
+
+function preload() {
+  soundFormats('mp3', 'wav', 'ogg');
+  kaChing = loadSound('https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg');
+  gameOverSound = loadSound('https://actions.google.com/sounds/v1/cartoon/stomach_thumps.ogg');
+  handPose = ml5.handPose({ flipped: true, maxHands: 2 });
+}
+
+function setup() {
+  createCanvas(fixedWidth, fixedHeight);
+  video = createCapture(VIDEO, { flipped: true });
+  video.size(160, 120);
+  video.hide();
+  handPose.detectStart(video, gotHands);
+  resetGame();
+  setTimeout(() => {
+    cameraReady = true;
+    document.getElementById('cameraStatus').textContent = 'Camera ready - Show your hand!';
+  }, 2000);
+}
+
+function gotHands(results) {
+  hands = results;
+  if (hands.length > 0) {
+    handDetected = true;
+    let hand = hands[0];
+    if (hand.keypoints && hand.keypoints.length > 0) {
+      let palmXs = palmIndices.map(i => hand.keypoints[i]?.x || 0);
+      let avgPalmX = palmXs.reduce((sum, x) => sum + x, 0) / palmXs.length;
+
+      // Map only middle 60% of video input to full canvas
+      let leftBound = 0.2 * video.width;
+      let rightBound = 0.8 * video.width;
+      handX = map(avgPalmX, leftBound, rightBound, 0, width);
+      handX = constrain(handX, 0, width);
+      smoothedHandX = lerp(smoothedHandX, handX, smoothingFactor);
+      document.getElementById('cameraStatus').textContent = `Hand detected (${hand.handedness}) - Hand control active!`;
+    }
+  } else {
+    handDetected = false;
+    document.getElementById('cameraStatus').textContent = 'No hand detected - Hold up your hand!';
+  }
+}
+
+function resetGame() {
+  bird = new Bird();
+  pipes = [];
+  score = 0;
+  lastScore = 0;
+  prevtime = Date.now();
+  scoreFlashTimer = 0;
+  frameCount = 0;
+  gameOver = false;
+  smoothedHandX = width / 2;
+  gameOverTime = null;
+  loop();
+}
+
+function draw() {
+  background('#87ce00');
+
+  if (video && cameraReady) {
+    push();
+    tint(255, 150);
+    image(video, width - 320 - 10, height - 240 - 10, 320, 240);
+    if (hands.length > 0) {
+      let hand = hands[0];
+      if (hand.keypoints && hand.keypoints.length > 0) {
+        for (let keypoint of hand.keypoints) {
+          let x = map(keypoint.x, 0, video.width, width - 320 - 10, width - 10);
+          let y = map(keypoint.y, 0, video.height, height - 240 - 10, height - 10);
+          fill(255, 100, 100); noStroke();
+          circle(x, y, 4);
+        }
+        // let wrist = hand.keypoints[0];
+        let palmXs = palmIndices.map(i => hand.keypoints[i]?.x || 0);
+        let palmYs = palmIndices.map(i => hand.keypoints[i]?.y || 0);
+        let avgPalmX = palmXs.reduce((sum, x) => sum + x, 0) / palmXs.length;
+        let avgPalmY = palmYs.reduce((sum, y) => sum + y, 0) / palmYs.length;
+
+        let x = map(avgPalmX, 0, video.width, width - 320 - 10, width - 10);
+        let y = map(avgPalmY, 0, video.height, height - 240 - 10, height - 10);
+        fill(255, 0, 0); stroke(255); strokeWeight(2);
+        circle(x, y, 12);
+      }
+    }
+    pop();
+  }
+
+  if (handDetected && hands.length > 0) {
+    bird.setTargetX(smoothedHandX);
+  }
+
+  for (let i = pipes.length - 1; i >= 0; i--) {
+    pipes[i].update();
+    pipes[i].show();
+    if (pipes[i].hits(bird)) {
+      if (!gameOver) {
+        if (gameOverSound && gameOverSound.isLoaded()) {
+          gameOverSound.setVolume(0.9);
+          gameOverSound.play();
+        }
+        gameOver = true;
+        gameOverTime = millis();
+      }
+    }
+    if (pipes[i].offscreen()) {
+      score++;
+      pipes.splice(i, 1);
+    }
+  }
+
+  if (score > lastScore && !gameOver) {
+    scoreFlashTimer = 15;
+    lastScore = score;
+    if (kaChing && kaChing.isLoaded()) {
+      kaChing.setVolume(0.33);
+      kaChing.play();
+    }
+  }
+
+  bird.update();
+  bird.show();
+
+  if (frameCount % 130 == 0) {
+    pipes.push(new Pipe());
+  }
+
+  // UI
+  push();
+  fill(255); noStroke(); textSize(20);
+  text("Frame: " + frameCount, 10, height - 60);
+  if (frameCount % 50 == 0) {
+    currenttime = Date.now();
+    fps = Math.floor(50 / (currenttime - prevtime) * 1000);
+    prevtime = currenttime;
+  }
+  text("FPS: " + fps, 10, height - 40);
+  fill(handDetected ? 'green' : 'red');
+  text("Hand: " + (handDetected ? "DETECTED" : "NOT DETECTED"), 10, height - 20);
+  textSize(42);
+  fill(scoreFlashTimer > 0 ? 'yellow' : 255);
+  if (scoreFlashTimer > 0) scoreFlashTimer--;
+  text("Score: " + score, 10, 40);
+  pop();
+
+  if (gameOver) {
+    push();
+    textAlign(CENTER, CENTER);
+    textSize(64);
+    fill(255, 0, 0);
+    stroke(0); strokeWeight(4);
+    text("GAME OVER\nScore: " + score, width / 2, height / 2);
+    pop();
+  }
+
+  if (gameOver && gameOverTime && millis() - gameOverTime > 3000) {
+    resetGame();
+  }
+}
+
+function keyPressed() {
+  if (key === 'r' || key === 'R') {
+    resetGame();
+  }
+}
+
+class Bird {
+  constructor() {
+    this.x = width / 2;
+    this.y = height - 30;
+    this.targetX = width / 2;
+    this.size = 32;
+    this.speed = 8;
+  }
+
+  setTargetX(tx) {
+    this.targetX = constrain(tx, this.size / 2, width - this.size / 2);
+  }
+
+  update() {
+    this.x = lerp(this.x, this.targetX, 0.2);
+  }
+
+  show() {
+    fill(255, 50, 50); stroke(255); strokeWeight(2);
+    ellipse(this.x, this.y, this.size, this.size);
+    fill(255); noStroke();
+    ellipse(this.x - 6, this.y - 4, 8, 8);
+    ellipse(this.x + 6, this.y - 4, 8, 8);
+    fill(0);
+    ellipse(this.x - 6, this.y - 4, 4, 4);
+    ellipse(this.x + 6, this.y - 4, 4, 4);
+  }
+}
+
+class Pipe {
+  constructor() {
+    this.w = random(pipeMin, width - pipeGap - pipeMin);
+    this.gap = pipeGap;
+    this.y = 0;
+    this.h = 40;
+    this.speed = 2;
+  }
+
+  hits(bird) {
+    const topY = this.y, botY = this.y + this.h;
+    const left1 = 0, right1 = this.w;
+    const left2 = this.w + this.gap, right2 = width;
+    const bx = bird.x, by = bird.y, r = bird.size / 2;
+    const hitLeft = bx + r > left1 && bx - r < right1 && by + r > topY && by - r < botY;
+    const hitRight = bx + r > left2 && bx - r < right2 && by + r > topY && by - r < botY;
+    return hitLeft || hitRight;
+  }
+
+  offscreen() {
+    return this.y > height;
+  }
+
+  update() {
+    this.y += this.speed;
+  }
+
+  show() {
+    fill(34, 139, 34); stroke(0, 100, 0); strokeWeight(2);
+    rect(0, this.y, this.w, this.h);
+    rect(this.w + this.gap, this.y, width - this.w - this.gap, this.h);
+  }
+}
+</script>
+</body>
+</html>
