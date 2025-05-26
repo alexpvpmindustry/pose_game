@@ -7,37 +7,21 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.10.0/addons/p5.sound.min.js"></script>
   <script src="https://unpkg.com/ml5@1/dist/ml5.min.js"></script>
   <style>
-    body { 
-      margin: 0; 
-      padding: 0; 
-      overflow: hidden; 
-      background: #87ceeb; 
-      display: flex; 
-      justify-content: center; 
-      align-items: center; 
-      height: 100vh;
+    body {
+      margin: 0; padding: 0; overflow: hidden;
+      background: #87ceeb;
+      display: flex; justify-content: center; align-items: center; height: 100vh;
       font-family: Arial, sans-serif;
     }
     canvas { display: block; }
     .instructions {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      color: white;
-      background: rgba(0,0,0,0.7);
-      padding: 10px;
-      border-radius: 5px;
-      font-size: 30px;
-      z-index: 100;
+      position: absolute; top: 10px; left: 10px; color: white;
+      background: rgba(0,0,0,0.7); padding: 10px; border-radius: 5px;
+      font-size: 30px; z-index: 100;
     }
     .camera-status {
-      position: absolute;
-      bottom: 10px;
-      right: 10px;
-      color: white;
-      background: rgba(0,0,0,0.7);
-      padding: 5px 10px;
-      border-radius: 5px;
+      position: absolute; bottom: 10px; right: 10px; color: white;
+      background: rgba(0,0,0,0.7); padding: 5px 10px; border-radius: 5px;
       font-size: 25px;
     }
   </style>
@@ -50,56 +34,33 @@
   <div class="camera-status" id="cameraStatus">Initializing camera...</div>
 
 <script>
-// Game variables
 let bird, pipes = [];
-let pipeGap = 150;
-let pipeMin = 50;
+let pipeGap = 280, pipeMin = 50;
 let score = 0, lastScore = 0, scoreFlashTimer = 0, gameOver = false;
-let kaChing;
-let prevtime = Date.now();
-let currenttime = Date.now();
+let kaChing,gameOverSound;
+let prevtime = Date.now(), currenttime = Date.now();
 let fps = 60;
-let fixedWidth = 800;
-let fixedHeight = 600;
-
-// Pose detection variables
-let video;
-let bodyPose;
-let poses = [];
-let noseX = 0;
-let previousNoseX = 0;
-let cameraReady = false;
-let poseDetected = false;
-
-// Control smoothing
-let smoothedNoseX = 0;
+let fixedWidth = 800, fixedHeight = 600;
+let video, bodyPose, poses = [];
+let noseX = 0, smoothedNoseX = 0;
+let cameraReady = false, poseDetected = false;
 let smoothingFactor = 0.3;
+let gameOverTime = null;
 
 function preload() {
   soundFormats('mp3', 'wav', 'ogg');
   kaChing = loadSound('https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg');
-  
-  // Initialize MoveNet model
-  bodyPose = ml5.bodyPose("MoveNet", {
-    flipped: true,
-  });
+  gameOverSound = loadSound("https://actions.google.com/sounds/v1/cartoon/stomach_thumps.ogg");
+  bodyPose = ml5.bodyPose("MoveNet", { flipped: true });
 }
 
 function setup() {
   createCanvas(fixedWidth, fixedHeight);
-  
-  // Setup video capture
   video = createCapture(VIDEO, { flipped: true });
-  video.size(160, 120); // Small video for performance
+  video.size(160, 120);
   video.hide();
-  
-  // Setup pose detection
   bodyPose.detectStart(video, gotPoses);
-  
-  // Initialize game
   resetGame();
-  
-  // Update camera status
   setTimeout(() => {
     cameraReady = true;
     document.getElementById('cameraStatus').textContent = 'Camera ready - Move your head!';
@@ -112,12 +73,11 @@ function gotPoses(results) {
     poseDetected = true;
     let pose = poses[0];
     if (pose.nose && pose.nose.confidence > 0.3) {
-      // Map nose position from video coordinates to game coordinates
-      noseX = map(pose.nose.x, 0, video.width, 0, width);
-      
-      // Smooth the movement
+      let leftBound = 0.2 * video.width;
+      let rightBound = 0.8 * video.width;
+      noseX = map(pose.nose.x, leftBound, rightBound, 0, width);
+      noseX = constrain(noseX, 0, width);
       smoothedNoseX = lerp(smoothedNoseX, noseX, smoothingFactor);
-      
       document.getElementById('cameraStatus').textContent = 'Pose detected - Head control active!';
     }
   } else {
@@ -136,58 +96,50 @@ function resetGame() {
   frameCount = 0;
   gameOver = false;
   smoothedNoseX = width / 2;
+  gameOverTime = null;
   loop();
 }
 
 function draw() {
   background('#87ce00');
-  
-  // Draw small video preview in corner (optional)
+
   if (video && cameraReady) {
     push();
-    tint(255, 100); // Make it semi-transparent
-    image(video, width - 160 - 10, height - 120 - 10, 160, 120);
-    
-    // Draw nose indicator on video preview
+    tint(255, 200);
+    image(video, width - 320 - 10, height - 240 - 10, 320, 240);
     if (poses.length > 0 && poses[0].nose) {
-      fill(255, 0, 0);
-      noStroke();
-      let previewNoseX = map(poses[0].nose.x, 0, video.width, width - 160 - 10, width - 10);
-      let previewNoseY = map(poses[0].nose.y, 0, video.height, height - 120 - 10, height - 10);
+      fill(255, 0, 0); noStroke();
+      let previewNoseX = map(poses[0].nose.x, 0, video.width, width - 320 - 10, width - 10);
+      let previewNoseY = map(poses[0].nose.y, 0, video.height, height - 240 - 10, height - 10);
       circle(previewNoseX, previewNoseY, 8);
     }
     pop();
   }
 
-  // Update bird position based on nose position
   if (poseDetected && poses.length > 0) {
     bird.setTargetX(smoothedNoseX);
   }
 
-  // Game logic
   for (let i = pipes.length - 1; i >= 0; i--) {
     pipes[i].update();
     pipes[i].show();
-
     if (pipes[i].hits(bird)) {
-      noLoop();
       if (!gameOver) {
+        if (gameOverSound && gameOverSound.isLoaded()) {
+          gameOverSound.setVolume(0.9);
+          gameOverSound.play();
+        }
         gameOver = true;
-        setTimeout(() => {
-          if (confirm("Game Over! Your score was: " + score + "\nPlay again?")) {
-            resetGame();
-          }
-        }, 100);
+        gameOverTime = millis();
       }
     }
-
     if (pipes[i].offscreen()) {
       score++;
       pipes.splice(i, 1);
     }
   }
 
-  if (score > lastScore) {
+  if (score > lastScore && !gameOver) {
     scoreFlashTimer = 15;
     lastScore = score;
     if (kaChing && kaChing.isLoaded()) {
@@ -205,9 +157,7 @@ function draw() {
 
   // UI
   push();
-  fill(255);
-  noStroke();
-  textSize(20);
+  fill(255); noStroke(); textSize(20);
   text("Frame: " + frameCount, 10, height - 60);
   if (frameCount % 50 == 0) {
     currenttime = Date.now();
@@ -215,32 +165,33 @@ function draw() {
     prevtime = currenttime;
   }
   text("FPS: " + fps, 10, height - 40);
-  
-  // Show pose status
-  if (poseDetected) {
-    fill(0, 255, 0);
-    text("Pose: DETECTED", 10, height - 20);
-  } else {
+  fill(poseDetected ? 'green' : 'red');
+  text("Pose: " + (poseDetected ? "DETECTED" : "NOT DETECTED"), 10, height - 20);
+  textSize(42);
+  fill(scoreFlashTimer > 0 ? 'yellow' : 255);
+  if (scoreFlashTimer > 0) scoreFlashTimer--;
+  text("Score: " + score, 10, 40);
+  pop();
+
+  // Game Over banner
+  if (gameOver) {
+    push();
+    textAlign(CENTER, CENTER);
+    textSize(64);
     fill(255, 0, 0);
-    text("Pose: NOT DETECTED", 10, height - 20);
+    stroke(0); strokeWeight(4);
+    text("GAME OVER\n Score: "+score, width / 2, height / 2);
+    pop();
+    //noLoop();
   }
 
-  textSize(42);
-  fill(255);
-  text("Score: ", 10, 40);
-  if (scoreFlashTimer > 0) {
-    fill(255, 255, 0);
-    textSize(42 + scoreFlashTimer);
-    scoreFlashTimer--;
-  } else {
-    fill(255);
-    textSize(42);
+  // Restart after 3 seconds
+  if (gameOver && gameOverTime && millis() - gameOverTime > 3000) {
+    resetGame();
   }
-  text(score, 150, 40);
-  pop();
 }
 
-// Fallback keyboard controls
+// Optional keyboard restart
 function keyPressed() {
   if (key === 'r' || key === 'R') {
     resetGame();
@@ -261,19 +212,13 @@ class Bird {
   }
 
   update() {
-    // Smooth movement towards target position
     this.x = lerp(this.x, this.targetX, 0.2);
   }
 
   show() {
-    fill(255, 50, 50);
-    stroke(255);
-    strokeWeight(2);
+    fill(255, 50, 50); stroke(255); strokeWeight(2);
     ellipse(this.x, this.y, this.size, this.size);
-    
-    // Draw eyes
-    fill(255);
-    noStroke();
+    fill(255); noStroke();
     ellipse(this.x - 6, this.y - 4, 8, 8);
     ellipse(this.x + 6, this.y - 4, 8, 8);
     fill(0);
@@ -292,20 +237,12 @@ class Pipe {
   }
 
   hits(bird) {
-    const topY = this.y;
-    const botY = this.y + this.h;
-    const left1 = 0;
-    const right1 = this.w;
-    const left2 = this.w + this.gap;
-    const right2 = width;
-
-    const bx = bird.x;
-    const by = bird.y;
-    const r = bird.size / 2;
-
+    const topY = this.y, botY = this.y + this.h;
+    const left1 = 0, right1 = this.w;
+    const left2 = this.w + this.gap, right2 = width;
+    const bx = bird.x, by = bird.y, r = bird.size / 2;
     const hitLeft = bx + r > left1 && bx - r < right1 && by + r > topY && by - r < botY;
     const hitRight = bx + r > left2 && bx - r < right2 && by + r > topY && by - r < botY;
-
     return hitLeft || hitRight;
   }
 
@@ -318,9 +255,7 @@ class Pipe {
   }
 
   show() {
-    fill(34, 139, 34);
-    stroke(0, 100, 0);
-    strokeWeight(2);
+    fill(34, 139, 34); stroke(0, 100, 0); strokeWeight(2);
     rect(0, this.y, this.w, this.h);
     rect(this.w + this.gap, this.y, width - this.w - this.gap, this.h);
   }
