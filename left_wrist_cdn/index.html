@@ -170,7 +170,7 @@ function draw() {
         gameOverTime = millis();
       }
     }
-    if (pipes[i].offscreen()) {
+    if (pipes[i].offscreen() && !gameOver ) {
       score++;
       pipes.splice(i, 1);
     }
