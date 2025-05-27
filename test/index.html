@@ -1,1 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Top 10 Singapore Businesses Directory</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <h1>SG<span>Directory</span></h1>
+                </div>
+                <nav class="main-nav">
+                    <ul>
+                        <li><a href="#top-businesses" class="active">Top 10</a></li>
+                        <li><a href="#honorable-mentions">Honorable Mentions</a></li>
+                        <li><a href="#about">About</a></li>
+                    </ul>
+                </nav>
+                <div class="mobile-menu-toggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+    </header>
 
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Top 10 <span class="category-name">[Category]</span> in Singapore</h1>
+                <p>Discover the highest-rated and most popular businesses in Singapore, carefully selected based on customer reviews, quality of service, and overall excellence.</p>
+                <div class="category-selector">
+                    <select id="category-dropdown">
+                        <option value="restaurants">Restaurants</option>
+                        <option value="cafes">Cafes</option>
+                        <option value="law-firms">Law Firms</option>
+                        <option value="plumbers">Plumbers</option>
+                        <option value="nail-salons">Nail Salons</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="top-businesses" class="top-businesses">
+        <div class="container">
+            <h2 class="section-title">Top 3 Featured Businesses</h2>
+            
+            <div class="top-three-grid">
+                <!-- Top 3 Business Cards -->
+                <div class="business-card featured-card">
+                    <div class="rank-badge">1</div>
+                    <div class="card-content">
+                        <div class="business-image">
+                            <img src="https://via.placeholder.com/300x200" alt="Business 1">
+                        </div>
+                        <div class="business-details">
+                            <h3 class="business-name">Premium Business Name</h3>
+                            <div class="rating">
+                                <span class="stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                </span>
+                                <span class="rating-number">4.5</span>
+                                <span class="review-count">(120 reviews)</span>
+                            </div>
+                            <p class="business-description">This premier establishment offers exceptional service with attention to detail and customer satisfaction. Their team of professionals ensures a memorable experience every time you visit.</p>
+                            <div class="business-info">
+                                <p class="address"><i class="fas fa-map-marker-alt"></i> 123 Business Ave, Central Region, Singapore 123456</p>
+                                <p class="phone"><i class="fas fa-phone"></i> +65 6123 4567</p>
+                                <p class="website"><i class="fas fa-globe"></i> <a href="#">www.business1.com.sg</a></p>
+                            </div>
+                            <div class="social-links">
+                                <a href="#" class="social-icon"><i class="fab fa-facebook"></i></a>
+                                <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                                <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                                <a href="#" class="social-icon"><i class="fab fa-linkedin"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="business-card featured-card">
+                    <div class="rank-badge">2</div>
+                    <div class="card-content">
+                        <div class="business-image">
+                            <img src="https://via.placeholder.com/300x200" alt="Business 2">
+                        </div>
+                        <div class="business-details">
+                            <h3 class="business-name">Superior Services Co.</h3>
+                            <div class="rating">
+                                <span class="stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="far fa-star"></i>
+                                </span>
+                                <span class="rating-number">4.0</span>
+                                <span class="review-count">(98 reviews)</span>
+                            </div>
+                            <p class="business-description">Superior Services Co. has built a reputation for excellence in the industry with their innovative approach and dedicated staff. They consistently exceed customer expectations with their quality and reliability.</p>
+                            <div class="business-info">
+                                <p class="address"><i class="fas fa-map-marker-alt"></i> 456 Quality Street, East Region, Singapore 234567</p>
+                                <p class="phone"><i class="fas fa-phone"></i> +65 6234 5678</p>
+                                <p class="website"><i class="fas fa-globe"></i> <a href="#">www.superiorservices.com.sg</a></p>
+                            </div>
+                            <div class="social-links">
+                                <a href="#" class="social-icon"><i class="fab fa-facebook"></i></a>
+                                <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                                <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                                <a href="#" class="social-icon"><i class="fab fa-linkedin"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="business-card featured-card">
+                    <div class="rank-badge">3</div>
+                    <div class="card-content">
+                        <div class="business-image">
+                            <img src="https://via.placeholder.com/300x200" alt="Business 3">
+                        </div>
+                        <div class="business-details">
+                            <h3 class="business-name">Elite Enterprises</h3>
+                            <div class="rating">
+                                <span class="stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="far fa-star"></i>
+                                </span>
+                                <span class="rating-number">4.0</span>
+                                <span class="review-count">(87 reviews)</span>
+                            </div>
+                            <p class="business-description">Elite Enterprises delivers top-tier solutions with a focus on customer satisfaction and industry-leading practices. Their experienced team provides personalized service that keeps clients coming back.</p>
+                            <div class="business-info">
+                                <p class="address"><i class="fas fa-map-marker-alt"></i> 789 Excellence Road, West Region, Singapore 345678</p>
+                                <p class="phone"><i class="fas fa-phone"></i> +65 6345 6789</p>
+                                <p class="website"><i class="fas fa-globe"></i> <a href="#">www.eliteenterprises.com.sg</a></p>
+                            </div>
+                            <div class="social-links">
+                                <a href="#" class="social-icon"><i class="fab fa-facebook"></i></a>
+                                <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                                <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                                <a href="#" class="social-icon"><i class="fab fa-linkedin"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h2 class="section-title">Businesses Ranked 4-10</h2>
+            
+            <div class="standard-grid">
+                <!-- Standard Business Cards (4-10) -->
+                <div class="business-card standard-card">
+                    <div class="rank-badge">4</div>
+                    <div class="business-image">
+                        <img src="https://via.placeholder.com/300x200" alt="Business 4">
+                    </div>
+                    <div class="business-details">
+                        <h3 class="business-name">Quality Providers Ltd</h3>
+                        <div class="rating">
+                            <span class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                                <i class="far fa-star"></i>
+                            </span>
+                            <span class="rating-number">3.5</span>
+                        </div>
+                        <p class="business-description">Quality Providers Ltd offers reliable services with a customer-first approach. Their dedicated team ensures satisfaction with every interaction.</p>
+                        <div class="business-info">
+                            <p class="address"><i class="fas fa-map-marker-alt"></i> 101 Service Lane, North Region</p>
+                            <p class="phone"><i class="fas fa-phone"></i> +65 6456 7890</p>
+                        </div>
+                        <div class="social-links">
+                            <a href="#" class="social-icon"><i class="fab fa-facebook"></i></a>
+                            <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                            <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="business-card standard-card">
+                    <div class="rank-badge">5</div>
+                    <div class="business-image">
+                        <img src="https://via.placeholder.com/300x200" alt="Business 5">
+                    </div>
+                    <div class="business-details">
+                        <h3 class="business-name">Reliable Solutions</h3>
+                        <div class="rating">
+                            <span class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                                <i class="far fa-star"></i>
+                            </span>
+                            <span class="rating-number">3.5</span>
+                        </div>
+                        <p class="business-description">Reliable Solutions combines expertise with affordability to deliver consistent results. Their professional team works efficiently to meet client needs.</p>
+                        <div class="business-info">
+                            <p class="address"><i class="fas fa-map-marker-alt"></i> 202 Dependable Drive, East Region</p>
+                            <p class="phone"><i class="fas fa-phone"></i> +65 6567 8901</p>
+                        </div>
+                        <div class="social-links">
+                            <a href="#" class="social-icon"><i class="fab fa-facebook"></i></a>
+                            <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                            <a href="#" class="social-icon"><i class="fab fa-linkedin"></i></a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="business-card standard-card">
+                    <div class="rank-badge">6</div>
+                    <div class="business-image">
+                        <img src="https://via.placeholder.com/300x200" alt="Business 6">
+                    </div>
+                    <div class="business-details">
+                        <h3 class="business-name">Trusted Partners Inc</h3>
+                        <div class="rating">
+                            <span class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="far fa-star"></i>
+                                <i class="far fa-star"></i>
+                            </span>
+                            <span class="rating-number">3.0</span>
+                        </div>
+                        <p class="business-description">Trusted Partners Inc provides solid service with a focus on building long-term relationships. They maintain high standards across all their offerings.</p>
+                        <div class="business-info">
+                            <p class="address"><i class="fas fa-map-marker-alt"></i> 303 Reliable Road, Central Region</p>
+                            <p class="phone"><i class="fas fa-phone"></i> +65 6678 9012</p>
+                        </div>
+                        <div class="social-links">
+                            <a href="#" class="social-icon"><i class="fab fa-facebook"></i></a>
+                            <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                            <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="business-card standard-card">
+                    <div class="rank-badge">7</div>
+                    <div class="business-image">
+                        <img src="https://via.placeholder.com/300x200" alt="Business 7">
+                    </div>
+                    <div class="business-details">
+                        <h3 class="business-name">Value Services Group</h3>
+                        <div class="rating">
+                            <span class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="far fa-star"></i>
+                                <i class="far fa-star"></i>
+                            </span>
+                            <span class="rating-number">3.0</span>
+                        </div>
+                        <p class="business-description">Value Services Group offers competitive pricing without compromising on quality. Their efficient approach makes them a popular choice for budget-conscious clients.</p>
+                        <div class="business-info">
+                            <p class="address"><i class="fas fa-map-marker-alt"></i> 404 Affordable Avenue, West Region</p>
+                            <p class="phone"><i class="fas fa-phone"></i> +65 6789 0123</p>
+                        </div>
+                        <div class="social-links">
+                            <a href="#" class="social-icon"><i class="fab fa-facebook"></i></a>
+                            <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                            <a href="#" class="social-icon"><i class="fab fa-linkedin"></i></a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="business-card standard-card">
+                    <div class="rank-badge">8</div>
+                    <div class="business-image">
+                        <img src="https://via.placeholder.com/300x200" alt="Business 8">
+                    </div>
+                    <div class="business-details">
+                        <h3 class="business-name">Solid Standards Co</h3>
+                        <div class="rating">
+                            <span class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="far fa-star"></i>
+                                <i class="far fa-star"></i>
+                            </span>
+                            <span class="rating-number">3.0</span>
+                        </div>
+                        <p class="business-description">Solid Standards Co maintains consistent quality across their service offerings. Their experienced team delivers reliable results for every client.</p>
+                        <div class="business-info">
+                            <p class="address"><i class="fas fa-map-marker-alt"></i> 505 Consistent Court, North Region</p>
+                            <p class="phone"><i class="fas fa-phone"></i> +65 6890 1234</p>
+                        </div>
+                        <div class="social-links">
+                            <a href="#" class="social-icon"><i class="fab fa-facebook"></i></a>
+                            <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                            <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="business-card standard-card">
+                    <div class="rank-badge">9</div>
+                    <div class="business-image">
+                        <img src="https://via.placeholder.com/300x200" alt="Business 9">
+                    </div>
+                    <div class="business-details">
+                        <h3 class="business-name">Decent Deliverables</h3>
+                        <div class="rating">
+                            <span class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="far fa-star"></i>
+                                <i class="far fa-star"></i>
+                            </span>
+                            <span class="rating-number">3.0</span>
+                        </div>
+                        <p class="business-description">Decent Deliverables provides satisfactory service at competitive rates. Their straightforward approach appeals to practical customers seeking reliability.</p>
+                        <div class="business-info">
+                            <p class="address"><i class="fas fa-map-marker-alt"></i> 606 Practical Place, East Region</p>
+                            <p class="phone"><i class="fas fa-phone"></i> +65 6901 2345</p>
+                        </div>
+                        <div class="social-links">
+                            <a href="#" class="social-icon"><i class="fab fa-facebook"></i></a>
+                            <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                            <a href="#" class="social-icon"><i class="fab fa-linkedin"></i></a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="business-card standard-card">
+                    <div class="rank-badge">10</div>
+                    <div class="business-image">
+                        <img src="https://via.placeholder.com/300x200" alt="Business 10">
+                    </div>
+                    <div class="business-details">
+                        <h3 class="business-name">Adequate Associates</h3>
+                        <div class="rating">
+                            <span class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="far fa-star"></i>
+                                <i class="far fa-star"></i>
+                            </span>
+                            <span class="rating-number">3.0</span>
+                        </div>
+                        <p class="business-description">Adequate Associates offers basic services that meet industry standards. Their no-frills approach makes them accessible to a wide range of customers.</p>
+                        <div class="business-info">
+                            <p class="address"><i class="fas fa-map-marker-alt"></i> 707 Standard Street, West Region</p>
+                            <p class="phone"><i class="fas fa-phone"></i> +65 6012 3456</p>
+                        </div>
+                        <div class="social-links">
+                            <a href="#" class="social-icon"><i class="fab fa-facebook"></i></a>
+                            <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                            <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="honorable-mentions" class="honorable-mentions">
+        <div class="container">
+            <h2 class="section-title">Honorable Mentions</h2>
+            <p class="section-description">These businesses didn't quite make our top 10 but still offer excellent services worth considering.</p>
+            
+            <div class="honorable-scroll">
+                <!-- Honorable Mentions Cards -->
+                <div class="business-card honorable-card">
+                    <div class="business-image">
+                        <img src="https://via.placeholder.com/300x200" alt="Honorable Business 1">
+                    </div>
+                    <div class="business-details">
+                        <h3 class="business-name">Worthy Mention One</h3>
+                        <div class="rating">
+                            <span class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="far fa-star"></i>
+                                <i class="far fa-star"></i>
+                            </span>
+                        </div>
+                        <div class="social-links">
+                            <a href="#" class="social-icon"><i class="fab fa-facebook"></i></a>
+                            <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="business-card honorable-card">
+                    <div class="business-image">
+                        <img src="https://via.placeholder.com/300x200" alt="Honorable Business 2">
+                    </div>
+                    <div class="business-details">
+                        <h3 class="business-name">Worthy Mention Two</h3>
+                        <div class="rating">
+                            <span class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="far fa-star"></i>
+                                <i class="far fa-star"></i>
+                            </span>
+                        </div>
+                        <div class="social-links">
+                            <a href="#" class="social-icon"><i class="fab fa-facebook"></i></a>
+                            <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="business-card honorable-card">
+                    <div class="business-image">
+                        <img src="https://via.placeholder.com/300x200" alt="Honorable Business 3">
+                    </div>
+                    <div class="business-details">
+                        <h3 class="business-name">Worthy Mention Three</h3>
+                        <div class="rating">
+                            <span class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="far fa-star"></i>
+                                <i class="far fa-star"></i>
+                            </span>
+                        </div>
+                        <div class="social-links">
+                            <a href="#" class="social-icon"><i class="fab fa-facebook"></i></a>
+                            <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="business-card honorable-card">
+                    <div class="business-image">
+                        <img src="https://via.placeholder.com/300x200" alt="Honorable Business 4">
+                    </div>
+                    <div class="business-details">
+                        <h3 class="business-name">Worthy Mention Four</h3>
+                        <div class="rating">
+                            <span class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="far fa-star"></i>
+                                <i class="far fa-star"></i>
+                            </span>
+                        </div>
+                        <div class="social-links">
+                            <a href="#" class="social-icon"><i class="fab fa-facebook"></i></a>
+                            <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="business-card honorable-card">
+                    <div class="business-image">
+                        <img src="https://via.placeholder.com/300x200" alt="Honorable Business 5">
+                    </div>
+                    <div class="business-details">
+                        <h3 class="business-name">Worthy Mention Five</h3>
+                        <div class="rating">
+                            <span class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="far fa-star"></i>
+                                <i class="far fa-star"></i>
+                            </span>
+                        </div>
+                        <div class="social-links">
+                            <a href="#" class="social-icon"><i class="fab fa-facebook"></i></a>
+                            <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="about">
+        <div class="container">
+            <h2 class="section-title">About This Directory</h2>
+            <div class="about-content">
+                <p>This directory showcases the top businesses in Singapore based on comprehensive research, customer reviews, and quality assessment. Our ranking methodology considers factors such as customer satisfaction, service quality, value for money, and overall reputation.</p>
+                <p>The listings are updated regularly to ensure accuracy and relevance. If you own a business that should be featured or have suggestions for improvement, please contact us.</p>
+                <div class="methodology">
+                    <h3>Our Ranking Methodology</h3>
+                    <ul>
+                        <li><strong>Customer Reviews:</strong> Aggregated from multiple platforms</li>
+                        <li><strong>Expert Assessment:</strong> Conducted by our team of specialists</li>
+                        <li><strong>Service Quality:</strong> Based on mystery shopping experiences</li>
+                        <li><strong>Value for Money:</strong> Comparing quality to price point</li>
+                        <li><strong>Industry Recognition:</strong> Awards and certifications</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <h2>SG<span>Directory</span></h2>
+                    <p>Your guide to Singapore's finest businesses</p>
+                </div>
+                <div class="footer-links">
+                    <h3>Categories</h3>
+                    <ul>
+                        <li><a href="#">Restaurants</a></li>
+                        <li><a href="#">Cafes</a></li>
+                        <li><a href="#">Law Firms</a></li>
+                        <li><a href="#">Plumbers</a></li>
+                        <li><a href="#">Nail Salons</a></li>
+                    </ul>
+                </div>
+                <div class="footer-contact">
+                    <h3>Contact Us</h3>
+                    <p><i class="fas fa-envelope"></i> info@sgdirectory.com</p>
+                    <p><i class="fas fa-phone"></i> +65 6123 4567</p>
+                    <div class="footer-social">
+                        <a href="#" class="social-icon"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Singapore Business Directory. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
