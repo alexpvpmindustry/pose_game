@@ -21,3 +21,5 @@ hello
 # test
 
 [testing only](https://alexpvpmindustry.github.io/pose_game/test/index.html)
+
+[testing no js](https://alexpvpmindustry.github.io/pose_game/test/index_no_js.html)
