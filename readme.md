@@ -18,3 +18,6 @@ hello
 
 [left right escape](https://alexpvpmindustry.github.io/pose_game/left_wrist_cdn/index.html)
 
+# test
+
+[testing only](https://alexpvpmindustry.github.io/pose_game/test/index.html)
