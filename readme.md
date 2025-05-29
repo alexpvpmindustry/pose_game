@@ -20,7 +20,7 @@ hello
 
 # test
 
-[full body pose detection](https://alexpvpmindustry.github.io/pose_game/backup/index_fullbody.html)
+[full body pose detection](https://alexpvpmindustry.github.io/pose_game/backup/index.html)
 
 [testing only](https://alexpvpmindustry.github.io/pose_game/test/index.html)
 
