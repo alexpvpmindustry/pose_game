@@ -19,6 +19,32 @@
         navigator.serviceWorker.register('service-worker.js');
       }
     </script>
+
+<button id="installBtn" style="position: fixed; top: 10px; right: 20px;">Install App Locally</button>
+
+<script>
+  let deferredPrompt;
+  const installBtn = document.getElementById('installBtn');
+  installBtn.style.display = 'none';
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    installBtn.style.display = 'block';
+  });
+
+  installBtn.addEventListener('click', async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        installBtn.style.display = 'none';
+      }
+      deferredPrompt = null;
+    }
+  });
+</script>
+
     
   </body>
 </html>
