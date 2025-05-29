@@ -19,8 +19,11 @@ function gotPoses(results) {
 function setup() {
   createCanvas(640, 360, WEBGL);
 
-  // Load and loop the video for pose detection 
-  video = createCapture(VIDEO, { flipped: true }); 
+  // Load and loop the video for pose detection
+  video = createVideo("dan_3D_test.mov");
+  video = createCapture(VIDEO, { flipped: true });
+  video.size(320, 240);
+  video.loop();
 
   // Start detecting poses
   bodyPose.detectStart(video, gotPoses);
@@ -32,8 +35,8 @@ function setup() {
 function draw() {
   scale(height / 3);
   orbitControl();
-  //rotateY(angle);
-  angle += 0.02;
+  rotateY(angle);
+  angle += 0.01;
   background(0);
 
   // Ensure at least one pose is detected
