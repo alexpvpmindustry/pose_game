@@ -6,7 +6,7 @@ let bodyPose;
 let poses = [];
 
 // Canvas dimensions
-let canvasWidth = 480;
+let canvasWidth = 320;
 let canvasHeight = 480;
 
 // Framerate variables
@@ -19,11 +19,18 @@ let lastFPSUpdate = 0;
 // Repetition counting variables
 let leftArmReps = 0;
 let rightArmReps = 0;
-let leftArmState = 'down'; // 'down' or 'up'
+let leftArmState = 'down'; // 'down', 'up'
 let rightArmState = 'down';
 let leftArmAngleHistory = [];
 let rightArmAngleHistory = [];
 let smoothingFrames = 5; // Number of frames to average for smoothing
+
+// Status tracking for visual indicators
+let leftArmStatus = 'raise'; // 'raise', 'lower'
+let rightArmStatus = 'raise';
+let statusChangeTime = 0; // For flashing effect
+let showCelebration = false;
+let celebrationTime = 0;
 
 // Thresholds for shoulder raise detection
 const RAISE_THRESHOLD = 120; // Angle threshold for "raised" position
@@ -82,6 +89,9 @@ function keyPressed() {
     rightArmState = 'down';
     leftArmAngleHistory = [];
     rightArmAngleHistory = [];
+    leftArmStatus = 'raise';
+    rightArmStatus = 'raise';
+    showCelebration = false;
     console.log('Rep counters reset');
   }
 }
@@ -127,7 +137,7 @@ function calculateAngle(point1, point2, point3) {
   
   let angle = abs(angle1 - angle2);
   if (angle > PI) {
-    angle = 2 * PI - angle; 
+    angle = 2 * PI - angle;
   }
   
   return degrees(angle);
@@ -160,20 +170,155 @@ function updateRepCounting(leftShoulderAngle, rightShoulderAngle) {
   let smoothedLeftAngle = smoothAngle(leftArmAngleHistory, leftShoulderAngle);
   let smoothedRightAngle = smoothAngle(rightArmAngleHistory, rightShoulderAngle);
   
-  // Left arm rep counting
+  // Left arm rep counting and status updates
   if (leftArmState === 'down' && smoothedLeftAngle > RAISE_THRESHOLD) {
     leftArmState = 'up';
+    leftArmReps++;
+    leftArmStatus = 'lower';
+    statusChangeTime = millis();
+    showCelebration = true;
+    celebrationTime = millis();
   } else if (leftArmState === 'up' && smoothedLeftAngle < LOWER_THRESHOLD) {
     leftArmState = 'down';
-    leftArmReps++;
+    leftArmStatus = 'raise';
+    statusChangeTime = millis();
+  } else if (leftArmState === 'down' && smoothedLeftAngle > LOWER_THRESHOLD && smoothedLeftAngle < RAISE_THRESHOLD) {
+    leftArmStatus = 'raise';
+  } else if (leftArmState === 'up' && smoothedLeftAngle < RAISE_THRESHOLD && smoothedLeftAngle > LOWER_THRESHOLD) {
+    leftArmStatus = 'lower';
   }
   
-  // Right arm rep counting
+  // Right arm rep counting and status updates
   if (rightArmState === 'down' && smoothedRightAngle > RAISE_THRESHOLD) {
     rightArmState = 'up';
+    rightArmReps++;
+    rightArmStatus = 'lower';
+    statusChangeTime = millis();
+    showCelebration = true;
+    celebrationTime = millis();
   } else if (rightArmState === 'up' && smoothedRightAngle < LOWER_THRESHOLD) {
     rightArmState = 'down';
-    rightArmReps++;
+    rightArmStatus = 'raise';
+    statusChangeTime = millis();
+  } else if (rightArmState === 'down' && smoothedRightAngle > LOWER_THRESHOLD && smoothedRightAngle < RAISE_THRESHOLD) {
+    rightArmStatus = 'raise';
+  } else if (rightArmState === 'up' && smoothedRightAngle < RAISE_THRESHOLD && smoothedRightAngle > LOWER_THRESHOLD) {
+    rightArmStatus = 'lower';
+  }
+}
+
+function drawStatusIndicators(pose) {
+  // Check if required points are available
+  if (!pose.left_shoulder || !pose.right_shoulder || 
+      pose.left_shoulder.confidence < 0.3 || pose.right_shoulder.confidence < 0.3) {
+    return;
+  }
+  
+  let currentTime = millis();
+  
+  // Draw left arm status indicator
+  drawArmStatusIndicator(pose.left_shoulder, leftArmStatus, 'LEFT', currentTime);
+  
+  // Draw right arm status indicator  
+  drawArmStatusIndicator(pose.right_shoulder, rightArmStatus, 'RIGHT', currentTime);
+  
+  // Draw celebration effect when rep is completed
+  if (showCelebration && currentTime - celebrationTime < 1000) {
+    drawCelebrationEffect(currentTime);
+  } else if (currentTime - celebrationTime >= 1000) {
+    showCelebration = false;
+  }
+}
+
+function drawArmStatusIndicator(shoulderPoint, status, side, currentTime) {
+  let x = shoulderPoint.x;
+  let y = shoulderPoint.y;
+  
+  // Offset for left vs right side
+  let offsetX = side === 'LEFT' ? -60 : 60;
+  
+  // Flash effect for status changes
+  let flashIntensity = 1;
+  if (currentTime - statusChangeTime < 500) {
+    flashIntensity = 0.5 + 0.5 * sin((currentTime - statusChangeTime) * 0.02);
+  }
+  
+  // Draw status background
+  fill(0, 0, 0, 150 * flashIntensity);
+  noStroke();
+  rect(x + offsetX - 25, y - 40, 50, 30, 5);
+  
+  // Draw status text and arrow
+  textAlign(CENTER);
+  textSize(12);
+  
+  if (status === 'raise') {
+    // Draw upward arrow and "RAISE" text
+    fill(0, 255, 0, 255 * flashIntensity); // Green
+    text('RAISE', x + offsetX, y - 22);
+    
+    // Draw upward arrow
+    stroke(0, 255, 0, 255 * flashIntensity);
+    strokeWeight(3);
+    // Arrow shaft
+    line(x + offsetX, y - 15, x + offsetX, y - 5);
+    // Arrow head
+    line(x + offsetX, y - 15, x + offsetX - 5, y - 10);
+    line(x + offsetX, y - 15, x + offsetX + 5, y - 10);
+    
+  } else if (status === 'lower') {
+    // Draw downward arrow and "LOWER" text
+    fill(255, 165, 0, 255 * flashIntensity); // Orange
+    text('LOWER', x + offsetX, y - 22);
+    
+    // Draw downward arrow
+    stroke(255, 165, 0, 255 * flashIntensity);
+    strokeWeight(3);
+    // Arrow shaft
+    line(x + offsetX, y - 15, x + offsetX, y - 5);
+    // Arrow head
+    line(x + offsetX, y - 5, x + offsetX - 5, y - 10);
+    line(x + offsetX, y - 5, x + offsetX + 5, y - 10);
+  }
+  
+  noStroke();
+}
+
+function drawCelebrationEffect(currentTime) {
+  // Pulsing celebration text
+  let pulseScale = 1 + 0.3 * sin((currentTime - celebrationTime) * 0.02);
+  
+  // Semi-transparent overlay
+  fill(255, 255, 0, 50);
+  rect(0, 0, canvasWidth, canvasHeight);
+  
+  // Celebration text
+  push();
+  translate(canvasWidth / 2, canvasHeight / 2);
+  scale(pulseScale);
+  textAlign(CENTER);
+  textSize(36);
+  fill(255, 215, 0); // Gold
+  stroke(255, 140, 0);
+  strokeWeight(2);
+  text('REP COMPLETED!', 0, 0);
+  
+  textSize(18);
+  fill(255, 255, 255);
+  noStroke();
+  text('Keep going!', 0, 30);
+  pop();
+  
+  // Sparkle effects
+  for (let i = 0; i < 8; i++) {
+    let angle = (currentTime - celebrationTime) * 0.01 + i * PI / 4;
+    let radius = 100 + 20 * sin((currentTime - celebrationTime) * 0.03);
+    let sparkleX = canvasWidth / 2 + cos(angle) * radius;
+    let sparkleY = canvasHeight / 2 + sin(angle) * radius;
+    
+    fill(255, 255, 0, 200);
+    noStroke();
+    circle(sparkleX, sparkleY, 8);
   }
 }
 
@@ -311,19 +456,36 @@ function displayFramerateInfo() {
 }
 
 function displayRepCounter() {
-  // Display repetition counter
+  // Display repetition counter with enhanced styling
   fill(255, 255, 255, 220);
   noStroke();
-  rect(canvasWidth - 160, 10, 150, 80);
+  rect(canvasWidth - 160, 10, 150, 100, 5);
 
   fill(0);
   textAlign(LEFT);
+  textSize(16);
+  text(`Shoulder Raises`, canvasWidth - 155, 30);
+  
+  // Enhanced rep display with status colors
   textSize(14);
-  text(`Shoulder Raises`, canvasWidth - 155, 28);
-  text(`Left Arm: ${leftArmReps}`, canvasWidth - 155, 45);
-  text(`Right Arm: ${rightArmReps}`, canvasWidth - 155, 62);
+  
+  // Left arm with status color
+  if (leftArmStatus === 'raise') fill(0, 180, 0);
+  else if (leftArmStatus === 'lower') fill(255, 140, 0);
+  else fill(0);
+  text(`Left: ${leftArmReps}`, canvasWidth - 155, 50);
+  
+  // Right arm with status color
+  if (rightArmStatus === 'raise') fill(0, 180, 0);
+  else if (rightArmStatus === 'lower') fill(255, 140, 0);
+  else fill(0);
+  text(`Right: ${rightArmReps}`, canvasWidth - 155, 70);
+  
+  // Instructions
+  fill(0);
   textSize(10);
-  text(`Press 'R' to reset`, canvasWidth - 155, 78);
+  text(`Press 'R' to reset`, canvasWidth - 155, 90);
+  text(`Follow the arrows!`, canvasWidth - 155, 102);
 }
 
 function draw() {
@@ -343,6 +505,9 @@ function draw() {
     
     // Draw angles at midpoints
     drawAngles(pose);
+    
+    // Draw status indicators and arrows
+    drawStatusIndicators(pose);
   }
 
   // Display framerate information
