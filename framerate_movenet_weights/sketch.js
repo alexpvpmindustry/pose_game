@@ -127,7 +127,7 @@ function calculateAngle(point1, point2, point3) {
   
   let angle = abs(angle1 - angle2);
   if (angle > PI) {
-    angle = 2 * PI - angle;
+    angle = 2 * PI - angle; 
   }
   
   return degrees(angle);
