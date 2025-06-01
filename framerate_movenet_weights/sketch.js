@@ -176,7 +176,7 @@ function draw() {
   // Calculate framerate
   calculateFramerate();
   push();
-  image(video, 9, 9);// 0, 0, canvasWidth, canvasHeight, 0, 0, canvasWidth, canvasHeight);
+  image(video,9,9);// 0, 0, canvasWidth, canvasHeight, 0, 0, canvasWidth, canvasHeight);
   pop();
 
   // Ensure at least one pose is detected before proceeding
