@@ -3,6 +3,7 @@ hello
 
 # pose_game
 
+[shoulder raise](https://alexpvpmindustry.github.io/pose_game/framerate_movenet_weights/index.html)
 
 [LR nose gesture](https://alexpvpmindustry.github.io/pose_game/gest_esc/index.html)
 
