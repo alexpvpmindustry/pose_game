@@ -1,6 +1,5 @@
-// ml5.js Real-Time Body Pose Detection with Keypoints and Framerate Control
-// Enhanced version with full skeleton display and framerate monitoring
-// Updated with video cropping to fit canvas
+// ml5.js Real-Time Body Pose Detection with Angle Measurement and Rep Counting
+// Enhanced version with angle display and dumbbell shoulder raise repetition counting
 
 let video;
 let bodyPose;
@@ -11,11 +10,24 @@ let canvasWidth = 480;
 let canvasHeight = 480;
 
 // Framerate variables
-let targetFramerate = 30; // Adjustable target framerate
+let targetFramerate = 30;
 let frameCount = 0;
 let startTime = 0;
 let calculatedFPS = 0;
 let lastFPSUpdate = 0;
+
+// Repetition counting variables
+let leftArmReps = 0;
+let rightArmReps = 0;
+let leftArmState = 'down'; // 'down' or 'up'
+let rightArmState = 'down';
+let leftArmAngleHistory = [];
+let rightArmAngleHistory = [];
+let smoothingFrames = 5; // Number of frames to average for smoothing
+
+// Thresholds for shoulder raise detection
+const RAISE_THRESHOLD = 120; // Angle threshold for "raised" position
+const LOWER_THRESHOLD = 90;  // Angle threshold for "lowered" position
 
 // Body connections for skeleton drawing
 const bodyConnections = [
@@ -27,11 +39,11 @@ const bodyConnections = [
 
   // Torso connections
   ['left_shoulder', 'right_shoulder'],
-  ['left_shoulder', 'left_elbow'],//this
+  ['left_shoulder', 'left_elbow'],
   ['right_shoulder', 'right_elbow'],
-  ['left_elbow', 'left_wrist'],//this
+  ['left_elbow', 'left_wrist'],
   ['right_elbow', 'right_wrist'],
-  ['left_shoulder', 'left_hip'],//this
+  ['left_shoulder', 'left_hip'],
   ['right_shoulder', 'right_hip'],
   ['left_hip', 'right_hip'],
 
@@ -62,6 +74,15 @@ function keyPressed() {
     targetFramerate = max(5, targetFramerate - 5);
     frameRate(targetFramerate);
     console.log(`Target framerate: ${targetFramerate} FPS`);
+  } else if (key === 'r' || key === 'R') {
+    // Reset rep counters
+    leftArmReps = 0;
+    rightArmReps = 0;
+    leftArmState = 'down';
+    rightArmState = 'down';
+    leftArmAngleHistory = [];
+    rightArmAngleHistory = [];
+    console.log('Rep counters reset');
   }
 }
 
@@ -69,6 +90,7 @@ function gotPoses(results) {
   // Store detected poses in the global array
   poses = results;
 }
+
 function setup() {
   // Create canvas for displaying video feed
   createCanvas(canvasWidth, canvasHeight);
@@ -96,6 +118,122 @@ function calculateFramerate() {
     startTime = currentTime;
     lastFPSUpdate = currentTime;
   }
+}
+
+function calculateAngle(point1, point2, point3) {
+  // Calculate angle between three points (point2 is the vertex)
+  let angle1 = atan2(point1.y - point2.y, point1.x - point2.x);
+  let angle2 = atan2(point3.y - point2.y, point3.x - point2.x);
+  
+  let angle = abs(angle1 - angle2);
+  if (angle > PI) {
+    angle = 2 * PI - angle;
+  }
+  
+  return degrees(angle);
+}
+
+function getMidpoint(point1, point2) {
+  // Calculate midpoint between two points
+  return {
+    x: (point1.x + point2.x) / 2,
+    y: (point1.y + point2.y) / 2
+  };
+}
+
+function smoothAngle(angleHistory, newAngle) {
+  // Add new angle to history
+  angleHistory.push(newAngle);
+  
+  // Keep only recent frames
+  if (angleHistory.length > smoothingFrames) {
+    angleHistory.shift();
+  }
+  
+  // Calculate average
+  let sum = angleHistory.reduce((a, b) => a + b, 0);
+  return sum / angleHistory.length;
+}
+
+function updateRepCounting(leftShoulderAngle, rightShoulderAngle) {
+  // Smooth the angles
+  let smoothedLeftAngle = smoothAngle(leftArmAngleHistory, leftShoulderAngle);
+  let smoothedRightAngle = smoothAngle(rightArmAngleHistory, rightShoulderAngle);
+  
+  // Left arm rep counting
+  if (leftArmState === 'down' && smoothedLeftAngle > RAISE_THRESHOLD) {
+    leftArmState = 'up';
+  } else if (leftArmState === 'up' && smoothedLeftAngle < LOWER_THRESHOLD) {
+    leftArmState = 'down';
+    leftArmReps++;
+  }
+  
+  // Right arm rep counting
+  if (rightArmState === 'down' && smoothedRightAngle > RAISE_THRESHOLD) {
+    rightArmState = 'up';
+  } else if (rightArmState === 'up' && smoothedRightAngle < LOWER_THRESHOLD) {
+    rightArmState = 'down';
+    rightArmReps++;
+  }
+}
+
+function drawAngles(pose) {
+  // Check if all required keypoints are available with sufficient confidence
+  const requiredPoints = ['left_hip', 'left_shoulder', 'left_elbow', 'left_wrist', 
+                         'right_hip', 'right_shoulder', 'right_elbow', 'right_wrist'];
+  
+  let allPointsValid = true;
+  for (let pointName of requiredPoints) {
+    if (!pose[pointName] || pose[pointName].confidence < 0.1) {
+      allPointsValid = false;
+      break;
+    }
+  }
+  
+  if (!allPointsValid) return;
+  
+  // Calculate angles
+  let leftHipShoulderElbow = calculateAngle(pose.left_hip, pose.left_shoulder, pose.left_elbow);
+  let leftShoulderElbowWrist = calculateAngle(pose.left_shoulder, pose.left_elbow, pose.left_wrist);
+  let rightHipShoulderElbow = calculateAngle(pose.right_hip, pose.right_shoulder, pose.right_elbow);
+  let rightShoulderElbowWrist = calculateAngle(pose.right_shoulder, pose.right_elbow, pose.right_wrist);
+  
+  // Update repetition counting (using shoulder angles for shoulder raises)
+  updateRepCounting(leftHipShoulderElbow, rightHipShoulderElbow);
+  
+  // Calculate midpoints for angle display
+  let leftShoulderMid = getMidpoint(pose.left_hip, pose.left_elbow);
+  let leftElbowMid = getMidpoint(pose.left_shoulder, pose.left_wrist);
+  let rightShoulderMid = getMidpoint(pose.right_hip, pose.right_elbow);
+  let rightElbowMid = getMidpoint(pose.right_shoulder, pose.right_wrist);
+  
+  // Display angles with background boxes for better visibility
+  textAlign(CENTER);
+  textSize(14);
+  
+  // Left hip-shoulder-elbow angle
+  fill(0, 0, 0, 150);
+  rect(leftShoulderMid.x - 25, leftShoulderMid.y - 12, 50, 24);
+  fill(255, 255, 0);
+  text(Math.round(leftHipShoulderElbow) + "°", leftShoulderMid.x, leftShoulderMid.y + 4);
+  
+  // Left shoulder-elbow-wrist angle
+  fill(0, 0, 0, 150);
+  rect(leftElbowMid.x - 25, leftElbowMid.y - 12, 50, 24);
+  fill(255, 100, 255);
+  text(Math.round(leftShoulderElbowWrist) + "°", leftElbowMid.x, leftElbowMid.y + 4);
+  
+  // Right hip-shoulder-elbow angle
+  fill(0, 0, 0, 150);
+  rect(rightShoulderMid.x - 25, rightShoulderMid.y - 12, 50, 24);
+  fill(255, 255, 0);
+  text(Math.round(rightHipShoulderElbow) + "°", rightShoulderMid.x, rightShoulderMid.y + 4);
+  
+  // Right shoulder-elbow-wrist angle
+  fill(0, 0, 0, 150);
+  rect(rightElbowMid.x - 25, rightElbowMid.y - 12, 50, 24);
+  fill(255, 100, 255);
+  text(Math.round(rightShoulderElbowWrist) + "°", rightElbowMid.x, rightElbowMid.y + 4);
 }
 
 function drawSkeleton(pose) {
@@ -172,13 +310,27 @@ function displayFramerateInfo() {
   text(`Use ↑↓ arrows to adjust`, 15, 55);
 }
 
+function displayRepCounter() {
+  // Display repetition counter
+  fill(255, 255, 255, 220);
+  noStroke();
+  rect(canvasWidth - 160, 10, 150, 80);
+
+  fill(0);
+  textAlign(LEFT);
+  textSize(14);
+  text(`Shoulder Raises`, canvasWidth - 155, 28);
+  text(`Left Arm: ${leftArmReps}`, canvasWidth - 155, 45);
+  text(`Right Arm: ${rightArmReps}`, canvasWidth - 155, 62);
+  textSize(10);
+  text(`Press 'R' to reset`, canvasWidth - 155, 78);
+}
+
 function draw() {
   // Calculate framerate
   calculateFramerate();
-  push();
-  image(video,9,9);// 0, 0, canvasWidth, canvasHeight, 0, 0, canvasWidth, canvasHeight);
-  pop();
-
+  image(video, 0, 0, canvasWidth, canvasHeight);
+  
   // Ensure at least one pose is detected before proceeding
   if (poses.length > 0) {
     let pose = poses[0];
@@ -188,8 +340,14 @@ function draw() {
 
     // Draw all keypoints
     drawKeypoints(pose);
+    
+    // Draw angles at midpoints
+    drawAngles(pose);
   }
 
   // Display framerate information
   displayFramerateInfo();
+  
+  // Display repetition counter
+  displayRepCounter();
 }
