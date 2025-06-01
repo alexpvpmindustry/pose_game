@@ -24,7 +24,7 @@ const bodyConnections = [
   ['nose', 'right_eye'],
   ['left_eye', 'left_ear'],
   ['right_eye', 'right_ear'],
-  
+
   // Torso connections
   ['left_shoulder', 'right_shoulder'],
   ['left_shoulder', 'left_elbow'],//this
@@ -34,7 +34,7 @@ const bodyConnections = [
   ['left_shoulder', 'left_hip'],//this
   ['right_shoulder', 'right_hip'],
   ['left_hip', 'right_hip'],
-  
+
   // Leg connections
   ['left_hip', 'left_knee'],
   ['right_hip', 'right_knee'],
@@ -69,37 +69,28 @@ function gotPoses(results) {
   // Store detected poses in the global array
   poses = results;
 }
-
 function setup() {
   // Create canvas for displaying video feed
   createCanvas(canvasWidth, canvasHeight);
-
-  // Load video
-  //video = createVideo("1000038799.mp4");
-//   video = createVideo("1000038803.mp4");
-//   video.loop();
-  video = createCapture(VIDEO, { flipped: true }); 
+  video = createCapture(VIDEO, { flipped: true });
   video.hide();
-
   // Set initial framerate
   frameRate(targetFramerate);
-
   // Start detecting poses from the video feed
   bodyPose.detectStart(video, gotPoses);
-  
   // Initialize framerate calculation
   startTime = millis();
 }
 
 function calculateFramerate() {
   frameCount++;
-  
+
   // Calculate FPS every 15 frames
   if (frameCount >= 15) {
     let currentTime = millis();
     let elapsedTime = currentTime - startTime;
     calculatedFPS = (15 / elapsedTime) * 1000; // Convert to FPS
-    
+
     // Reset for next calculation
     frameCount = 0;
     startTime = currentTime;
@@ -111,11 +102,9 @@ function drawSkeleton(pose) {
   // Draw skeleton connections
   stroke(255, 255, 255, 200);
   strokeWeight(3);
-  
   for (let connection of bodyConnections) {
     let pointA = pose[connection[0]];
     let pointB = pose[connection[1]];
-    
     // Only draw connection if both points have sufficient confidence
     if (pointA && pointB && pointA.confidence > 0.1 && pointB.confidence > 0.1) {
       line(pointA.x, pointA.y, pointB.x, pointB.y);
@@ -132,7 +121,7 @@ function drawKeypoints(pose) {
     right_eye: [100, 255, 100],
     left_ear: [100, 100, 255],
     right_ear: [100, 100, 255],
-    
+
     // Arms
     left_shoulder: [255, 255, 100],
     right_shoulder: [255, 255, 100],
@@ -140,31 +129,30 @@ function drawKeypoints(pose) {
     right_elbow: [255, 150, 100],
     left_wrist: [255, 100, 255],
     right_wrist: [255, 100, 255],
-    
+
     // Torso
     left_hip: [100, 255, 255],
     right_hip: [100, 255, 255],
-    
+
     // Legs
     left_knee: [150, 255, 150],
     right_knee: [150, 255, 150],
     left_ankle: [255, 200, 150],
     right_ankle: [255, 200, 150]
   };
-  
+
   noStroke();
-  
+
   // Draw keypoints for all body parts
   for (let [keypoint, color] of Object.entries(keypointColors)) {
     if (pose[keypoint] && pose[keypoint].confidence > 0.1) {
       fill(color[0], color[1], color[2], 200);
-      
+
       // Vary circle size based on keypoint type
       let size = 12;
       if (keypoint === 'nose') size = 20;
       else if (keypoint.includes('shoulder') || keypoint.includes('hip')) size = 16;
       else if (keypoint.includes('eye') || keypoint.includes('ear')) size = 8;
-      
       circle(pose[keypoint].x, pose[keypoint].y, size);
     }
   }
@@ -175,7 +163,7 @@ function displayFramerateInfo() {
   fill(255, 255, 255, 200);
   noStroke();
   rect(10, 10, 200, 60);
-  
+
   fill(0);
   textAlign(LEFT);
   textSize(12);
@@ -187,31 +175,21 @@ function displayFramerateInfo() {
 function draw() {
   // Calculate framerate
   calculateFramerate();
-  
-  // Crop and display the video to fit canvas exactly
-//   image(video,9,9);//, 0, 0, canvasWidth, canvasHeight, 0, 0, canvasWidth, canvasHeight);
-
-    // Flip the canvas horizontally
-    push();
-    // scale(-1, 1);
-    // translate(-width-180, 0);
-    
-    // Crop and display the video to fit canvas exactly
-    image(video,9,9);// 0, 0, canvasWidth, canvasHeight, 0, 0, canvasWidth, canvasHeight);
-    
-    pop();
+  push();
+  image(video, 9, 9);// 0, 0, canvasWidth, canvasHeight, 0, 0, canvasWidth, canvasHeight);
+  pop();
 
   // Ensure at least one pose is detected before proceeding
   if (poses.length > 0) {
     let pose = poses[0];
-    
+
     // Draw full skeleton
     drawSkeleton(pose);
-    
+
     // Draw all keypoints
     drawKeypoints(pose);
   }
-  
+
   // Display framerate information
   displayFramerateInfo();
 }
