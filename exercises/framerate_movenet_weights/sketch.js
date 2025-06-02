@@ -6,17 +6,10 @@ let bodyPose;
 let poses = [];
 
 // Canvas dimensions
-let canvasWidth = 360;
-let canvasHeight = 360;
-
-let constraints = {
-  video: {
-    width: 360,
-    height: 360
-  },
-  audio: false
-};
-
+let canvasWidth = 640;
+let canvasHeight = 640;
+let kaChing,gameOverSound;
+let currentRep = 0;
 // Framerate variables
 let targetFramerate = 30;
 let frameCount = 0;
@@ -72,6 +65,9 @@ const bodyConnections = [
 
 function preload() {
   // Initialize MoveNet model with flipped video input
+  soundFormats('mp3', 'wav', 'ogg');
+  kaChing = loadSound('https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg');
+  gameOverSound = loadSound("https://actions.google.com/sounds/v1/cartoon/stomach_thumps.ogg");
   bodyPose = ml5.bodyPose("MoveNet", { flipped: true });
 }
 
@@ -92,6 +88,7 @@ function keyPressed() {
     console.log(`Target framerate: ${targetFramerate} FPS`);
   } else if (key === 'r' || key === 'R') {
     // Reset rep counters
+    currentRep=0;
     leftArmReps = 0;
     rightArmReps = 0;
     leftArmState = 'down';
@@ -113,7 +110,6 @@ function gotPoses(results) {
 function setup() {
   // Create canvas for displaying video feed
   createCanvas(canvasWidth, canvasHeight);
-  //video = createCapture(constraints, { flipped: true });
   video = createCapture(VIDEO , { flipped: true });
   video.size(canvasWidth,canvasHeight);
   video.hide();
@@ -219,6 +215,13 @@ function updateRepCounting(leftShoulderAngle, rightShoulderAngle) {
   } else if (rightArmState === 'up' && smoothedRightAngle < RAISE_THRESHOLD && smoothedRightAngle > LOWER_THRESHOLD) {
     rightArmStatus = 'lower';
   }
+  if (rightArmReps+leftArmReps>currentRep){
+    if (kaChing && kaChing.isLoaded()) {
+      kaChing.setVolume(0.4);
+      kaChing.play();
+    }
+    currentRep = rightArmReps+leftArmReps;
+  }
 }
 
 function drawStatusIndicators(pose) {
@@ -316,7 +319,6 @@ function drawCelebrationEffect(currentTime) {
   stroke(255, 140, 0);
   strokeWeight(2);
   text('REP COMPLETED!', 0, 0);
-
   textSize(18);
   fill(255, 255, 255);
   noStroke();

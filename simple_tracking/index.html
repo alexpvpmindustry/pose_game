@@ -56,15 +56,15 @@
                     // Draw a circle at the detected left wrist position
                     fill(236, 100, 90);
                     noStroke();
-                    circle(pose.left_wrist.x, pose.left_wrist.y, 30);
+                    circle(pose.left_wrist.x, pose.left_wrist.y, 16);
                     // Draw a circle at the detected right wrist position
                     fill(100, 244, 90);
                     noStroke();
-                    circle(pose.right_wrist.x, pose.right_wrist.y, 30);
+                    circle(pose.right_wrist.x, pose.right_wrist.y, 16);
                     // Draw a circle at the detected nose position
                     fill(236, 1, 90);
                     noStroke();
-                    circle(pose.nose.x, pose.nose.y, 48);
+                    circle(pose.nose.x, pose.nose.y, 16);
 
                     // Draw circles at the detected ear positions
                     fill(45, 197, 244);
@@ -84,12 +84,12 @@
                     circle(
                         pose.right_shoulder.x,
                         pose.right_shoulder.y,
-                        64,
+                        16,
                     );
                     circle(
                         pose.left_shoulder.x,
                         pose.left_shoulder.y,
-                        64,
+                        16,
                     );
                 }
             }
