@@ -39,6 +39,7 @@ let rightArmStatus = 'raise';
 let statusChangeTime = 0; // For flashing effect
 let showCelebration = false;
 let celebrationTime = 0;
+let cameraReady = false;
 
 // Thresholds for shoulder raise detection
 const RAISE_THRESHOLD = 120; // Angle threshold for "raised" position
@@ -112,8 +113,13 @@ function gotPoses(results) {
 function setup() {
   // Create canvas for displaying video feed
   createCanvas(canvasWidth, canvasHeight);
-  video = createCapture(constraints, { flipped: true });
+  //video = createCapture(constraints, { flipped: true });
+  video = createCapture(VIDEO , { flipped: true });
+  video.size(canvasWidth,canvasHeight);
   video.hide();
+  setTimeout(() => {
+    cameraReady = true; 
+  }, 2000);
   // Set initial framerate
   frameRate(targetFramerate);
   // Start detecting poses from the video feed
@@ -551,8 +557,10 @@ function displayRepCounter() {
 function draw() {
   // Calculate framerate
   calculateFramerate();
+  push();
+  tint(255, 200);
   image(video, 0, 0, canvasWidth, canvasHeight);
-
+  pop();
   // Ensure at least one pose is detected before proceeding
   if (poses.length > 0) {
     let pose = poses[0];
