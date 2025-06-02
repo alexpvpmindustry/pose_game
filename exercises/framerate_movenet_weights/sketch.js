@@ -13,7 +13,8 @@ let constraints = {
   video: {
     width: 360,
     height: 360
-  }
+  },
+  audio: false
 };
 
 // Framerate variables
