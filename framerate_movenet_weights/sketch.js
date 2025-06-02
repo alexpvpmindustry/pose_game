@@ -6,8 +6,8 @@ let bodyPose;
 let poses = [];
 
 // Canvas dimensions
-let canvasWidth = 320;
-let canvasHeight = 480;
+let canvasWidth = 360;
+let canvasHeight = 360;
 
 // Framerate variables
 let targetFramerate = 30;
