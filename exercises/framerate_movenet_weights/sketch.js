@@ -465,19 +465,54 @@ function drawKeypoints(pose) {
   }
 }
 
+// function displayFramerateInfo() {
+//   // Display framerate information
+//   fill(255, 255, 255, 200);
+//   noStroke();
+//   rect(10, 10, 200, 60);
+
+//   fill(0);
+//   textAlign(LEFT);
+//   textSize(12);
+//   text(`Target FPS: ${targetFramerate}`, 15, 25);
+//   text(`Actual FPS: ${calculatedFPS.toFixed(1)}`, 15, 40);
+//   text(`Use ↑↓ arrows to adjust`, 15, 55);
+// }
+
 function displayFramerateInfo() {
   // Display framerate information
   fill(255, 255, 255, 200);
   noStroke();
-  rect(10, 10, 200, 60);
-
+  
+  // Calculate text dimensions for better fitting rectangle
+  textSize(12);
+  let maxTextWidth = max(
+    textWidth(`Target FPS: ${targetFramerate}`),
+    textWidth(`Actual FPS: ${calculatedFPS.toFixed(1)}`),
+    textWidth(`Use ↑↓ arrows to adjust`)
+  );
+  let rectWidth = maxTextWidth + 10; // Add padding
+  let rectHeight = 50; // Height for 3 lines of text + padding
+  
+  rect(10, 10, rectWidth, rectHeight);
+ 
   fill(0);
   textAlign(LEFT);
   textSize(12);
   text(`Target FPS: ${targetFramerate}`, 15, 25);
   text(`Actual FPS: ${calculatedFPS.toFixed(1)}`, 15, 40);
   text(`Use ↑↓ arrows to adjust`, 15, 55);
-}
+  
+  // Display canvas dimensions at bottom left
+  fill(255, 255, 255, 200);
+  noStroke();
+  let dimensionText = `${width} x ${height}`;
+  let dimTextWidth = textWidth(dimensionText) + 10;
+  rect(10, height - 30, dimTextWidth, 25);
+  
+  fill(0);
+  text(dimensionText, 15, height - 12);
+ }
 
 function displayRepCounter() {
   // Display repetition counter with enhanced styling
