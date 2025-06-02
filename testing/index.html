@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Nose Tracker</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.10.0/p5.min.js"></script>
+  <script src="https://unpkg.com/ml5@1/dist/ml5.min.js"></script>
+  <style>
+    body {
+      margin: 0; padding: 0; overflow: hidden;
+      background: #87ceeb;
+      display: flex; justify-content: center; align-items: center; height: 100vh;
+      font-family: Arial, sans-serif;
+    }
+    canvas { display: block; }
+    .status {
+      position: absolute; top: 10px; left: 10px; color: white;
+      background: rgba(0,0,0,0.7); padding: 10px; border-radius: 5px;
+      font-size: 16px; z-index: 100;
+    }
+  </style>
+</head>
+<body>
+  <div class="status" id="status">Initializing camera...</div>
+
+<script>
+let video, bodyPose, poses = [];
+let noseX = 0, noseY = 0;
+let lastNoseX = 0, lastNoseY = 0;
+let cameraReady = false, poseDetected = false;
+let frameSize = 150;
+
+function preload() {
+  bodyPose = ml5.bodyPose("MoveNet", { flipped: true });
+}
+
+function setup() {
+  createCanvas(600, 600);
+  video = createCapture(VIDEO, { flipped: true });
+  video.size(600, 600);
+  video.hide();
+  bodyPose.detectStart(video, gotPoses);
+  
+  // Initialize nose position to center of video
+  lastNoseX = video.width / 2;
+  lastNoseY = video.height / 2;
+  
+  setTimeout(() => {
+    cameraReady = true;
+    document.getElementById('status').textContent = 'Camera ready - tracking nose...';
+  }, 2000);
+}
+
+function gotPoses(results) {
+  poses = results;
+  if (poses.length > 0) {
+    let pose = poses[0];
+    if (pose.nose && pose.nose.confidence > 0.3) {
+      poseDetected = true;
+      noseX = pose.nose.x;
+      noseY = pose.nose.y;
+      lastNoseX = noseX;
+      lastNoseY = noseY;
+      document.getElementById('status').textContent = `Nose detected at (${Math.round(noseX)}, ${Math.round(noseY)})`;
+    } else {
+      poseDetected = false;
+      document.getElementById('status').textContent = 'No nose detected - using last position';
+    }
+  } else {
+    poseDetected = false;
+    document.getElementById('status').textContent = 'No pose detected';
+  }
+}
+
+function draw() {
+  background(50);
+  
+  if (video && cameraReady) {
+    // Use current nose position if detected, otherwise use last known position
+    let centerX = poseDetected ? noseX : lastNoseX;
+    let centerY = poseDetected ? noseY : lastNoseY;
+    
+    // Calculate the region to crop from the video
+    let cropX = centerX - frameSize/2;
+    let cropY = centerY - frameSize/2;
+    
+    // Constrain crop region to video bounds
+    cropX = constrain(cropX, 0, video.width - frameSize);
+    cropY = constrain(cropY, 0, video.height - frameSize);
+    
+    // Draw the cropped video frame in the center of canvas
+    let drawX = (width - frameSize) / 2;
+    let drawY = (height - frameSize) / 2;
+    image(video,  0, 0, width, height,cropX, cropY, frameSize, frameSize);
+    tint(255, 128);
+    image(video,width-frameSize,height-frameSize,frameSize,frameSize); 
+    noTint(); 
+    // Draw nose indicator if detected
+    if (poseDetected && poses.length > 0 && poses[0].nose) {
+      fill(255, 0, 0);
+      noStroke();
+      // Calculate nose position relative to the cropped frame
+      let relativeNoseX = noseX - cropX;
+      let relativeNoseY = noseY - cropY; 
+    circle(width+frameSize*(noseX/width-1),height+frameSize*(noseY/height-1),8);
+    }
+  }
+  
+  // Status info
+  fill(255);
+  noStroke();
+  textSize(16);
+  text(`Frame size: ${frameSize}x${frameSize}`, 10, height - 40);
+  text(`Pose detected: ${poseDetected ? 'YES' : 'NO'}`, 10, height - 20);
+}
+</script>
+</body>
+</html>
