@@ -86,24 +86,6 @@
       function preload() {
         // Initialize FaceMesh model with a maximum of one face
         faceMesh = ml5.faceMesh({ maxFaces: 1 });
-
-        // Load the texture images that will be mapped onto the face mesh
-        // Using placeholder images since we don't have the actual files
-        // img_cloud = createGraphics(200, 200);
-        // img_cloud.background(135, 206, 235); // Sky blue
-        // img_cloud.fill(255);
-        // img_cloud.noStroke();
-        // for(let i = 0; i < 20; i++) {
-        //   img_cloud.ellipse(random(200), random(200), random(30, 60));
-        // }
-
-        // img_orange = createGraphics(200, 200);
-        // img_orange.background(255, 165, 0); // Orange
-        // img_orange.fill(255, 140, 0);
-        // img_orange.noStroke();
-        // for(let i = 0; i < 15; i++) {
-        //   img_orange.ellipse(random(200), random(200), random(20, 40));
-        // }
         img_cloud = loadImage("clouds.png");
         img_orange = loadImage("orange.png");
         img = img_orange;
@@ -136,9 +118,9 @@
       }
 
       function setup() {
-        createCanvas(600, 600, WEBGL);
+        createCanvas(700, 700, WEBGL);
         video = createCapture(VIDEO);
-        video.size(600, 600);
+        video.size(700, 700);
         video.hide();
 
         // Start detecting faces
@@ -151,7 +133,7 @@
 
       function draw() {
         // Center the 3D space to align with the canvas
-        translate(-600 / 2, -600 / 2);
+        translate(-700 / 2, -700 / 2);
         background(0);
 
         // Display the video feed

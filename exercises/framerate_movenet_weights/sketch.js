@@ -6,8 +6,8 @@ let bodyPose;
 let poses = [];
 
 // Canvas dimensions
-let canvasWidth = 640;
-let canvasHeight = 640;
+let canvasWidth = 700;
+let canvasHeight = 700;
 let kaChing,gameOverSound;
 let currentRep = 0;
 // Framerate variables
