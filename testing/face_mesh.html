@@ -27,14 +27,16 @@
       let faces = [];
       let triangles;
       let uvCoords;
-      let img;
+      let img,img_cloud,img_orange;
 
       function preload() {
         // Initialize FaceMesh model with a maximum of one face
         faceMesh = ml5.faceMesh({ maxFaces: 1 });
 
         // Load the texture image that will be mapped onto the face mesh
-        img = loadImage("clouds.png");
+        img_cloud = loadImage("clouds.png");
+        img_orange = loadImage("orange.png");
+        img=img_orange;
       }
 
       function mousePressed() {
@@ -47,8 +49,9 @@
       }
 
       function setup() {
-        createCanvas(640, 480, WEBGL);
+        createCanvas(600, 600, WEBGL);
         video = createCapture(VIDEO);
+        video.size(600,600);
         video.hide();
 
         // Start detecting faces
