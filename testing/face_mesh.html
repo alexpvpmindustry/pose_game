@@ -1,22 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.10.0/p5.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.10.0/p5.min.js"></script>
     <script src="https://unpkg.com/ml5@1/dist/ml5.min.js"></script>
-    <!-- <link rel="stylesheet" type="text/css" href="style.css" /> -->
     <meta charset="utf-8" />
     <style>
       html, body {
         margin: 0;
         padding: 0;
+        font-family: Arial, sans-serif;
       }
       canvas {
         display: block;
+      }
+      .button-container {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 20px;
+      }
+      .texture-button {
+        padding: 10px 20px;
+        background-color: #333;
+        color: white;
+        border: 2px solid #666;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: all 0.3s ease;
+      }
+      .texture-button:hover {
+        background-color: #555;
+        border-color: #888;
+      }
+      .texture-button.active {
+        background-color: #007bff;
+        border-color: #0056b3;
       }
     </style>
   </head>
   <body>
     <main></main>
+    <div class="button-container">
+      <button class="texture-button active" id="orangeBtn" onclick="selectTexture('orange')">Orange</button>
+      <button class="texture-button" id="cloudBtn" onclick="selectTexture('cloud')">Cloud</button>
+    </div>
     <script>
       // Face Mesh Texture Mapping
       // https://thecodingtrain.com/tracks/ml5js-beginners-guide/ml5/facemesh
@@ -27,16 +57,49 @@
       let faces = [];
       let triangles;
       let uvCoords;
-      let img,img_cloud,img_orange;
+      let img, img_cloud, img_orange;
+      let currentTexture = 'orange';
 
       function preload() {
         // Initialize FaceMesh model with a maximum of one face
         faceMesh = ml5.faceMesh({ maxFaces: 1 });
 
-        // Load the texture image that will be mapped onto the face mesh
-        img_cloud = loadImage("clouds.png");
-        img_orange = loadImage("orange.png");
-        img=img_orange;
+        // Load the texture images that will be mapped onto the face mesh
+        // Using placeholder images since we don't have the actual files
+        img_cloud = createGraphics(200, 200);
+        img_cloud.background(135, 206, 235); // Sky blue
+        img_cloud.fill(255);
+        img_cloud.noStroke();
+        for(let i = 0; i < 20; i++) {
+          img_cloud.ellipse(random(200), random(200), random(30, 60));
+        }
+        
+        img_orange = createGraphics(200, 200);
+        img_orange.background(255, 165, 0); // Orange
+        img_orange.fill(255, 140, 0);
+        img_orange.noStroke();
+        for(let i = 0; i < 15; i++) {
+          img_orange.ellipse(random(200), random(200), random(20, 40));
+        }
+        
+        img = img_orange;
+      }
+
+      function selectTexture(textureType) {
+        currentTexture = textureType;
+        
+        // Update active button styling
+        document.querySelectorAll('.texture-button').forEach(btn => {
+          btn.classList.remove('active');
+        });
+        
+        if (textureType === 'orange') {
+          img = img_orange;
+          document.getElementById('orangeBtn').classList.add('active');
+        } else if (textureType === 'cloud') {
+          img = img_cloud;
+          document.getElementById('cloudBtn').classList.add('active');
+        }
       }
 
       function mousePressed() {
@@ -51,7 +114,7 @@
       function setup() {
         createCanvas(600, 600, WEBGL);
         video = createCapture(VIDEO);
-        video.size(600,600);
+        video.size(600, 600);
         video.hide();
 
         // Start detecting faces
@@ -101,19 +164,19 @@
               pointA.x,
               pointA.y,
               uvA[0],
-              uvA[1],
+              uvA[1]
             );
             vertex(
               pointB.x,
               pointB.y,
               uvB[0],
-              uvB[1],
+              uvB[1]
             );
             vertex(
               pointC.x,
               pointC.y,
               uvC[0],
-              uvC[1],
+              uvC[1]
             );
           }
 
