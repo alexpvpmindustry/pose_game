@@ -40,11 +40,6 @@ const LOWER_THRESHOLD = 90;  // Angle threshold for "lowered" position
 
 // Body connections for skeleton drawing
 const bodyConnections = [
-  // Head connections
-  // ['nose', 'left_eye'],
-  // ['nose', 'right_eye'],
-  // ['left_eye', 'left_ear'],
-  // ['right_eye', 'right_ear'],
 
   // Torso connections
   ['left_shoulder', 'right_shoulder'],
@@ -55,12 +50,6 @@ const bodyConnections = [
   ['left_shoulder', 'left_hip'],
   ['right_shoulder', 'right_hip'],
   ['left_hip', 'right_hip'],
-
-  // Leg connections
-  // ['left_hip', 'left_knee'],
-  // ['right_hip', 'right_knee'],
-  // ['left_knee', 'left_ankle'],
-  // ['right_knee', 'right_ankle']
 ];
 
 function preload() {
@@ -473,20 +462,6 @@ function drawKeypoints(pose) {
     }
   }
 }
-
-// function displayFramerateInfo() {
-//   // Display framerate information
-//   fill(255, 255, 255, 200);
-//   noStroke();
-//   rect(10, 10, 200, 60);
-
-//   fill(0);
-//   textAlign(LEFT);
-//   textSize(12);
-//   text(`Target FPS: ${targetFramerate}`, 15, 25);
-//   text(`Actual FPS: ${calculatedFPS.toFixed(1)}`, 15, 40);
-//   text(`Use ↑↓ arrows to adjust`, 15, 55);
-// }
 
 function displayFramerateInfo() {
   // Display framerate information
