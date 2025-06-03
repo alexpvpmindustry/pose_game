@@ -9,6 +9,9 @@
         margin: 0;
         padding: 0;
         font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        /* align-items: center; */
       }
       canvas {
         display: block;
@@ -44,8 +47,28 @@
   <body>
     <main></main>
     <div class="button-container">
-      <button class="texture-button active" id="orangeBtn" onclick="selectTexture('orange')">Orange</button>
-      <button class="texture-button" id="cloudBtn" onclick="selectTexture('cloud')">Cloud</button>
+      <button
+        class="texture-button"
+        id="backBtn"
+        onclick="goBack()"
+        style="background-color: #dc3545; border-color: #c82333"
+      >
+        Back
+      </button>
+      <button
+        class="texture-button active"
+        id="orangeBtn"
+        onclick="selectTexture('orange')"
+      >
+        Orange
+      </button>
+      <button
+        class="texture-button"
+        id="cloudBtn"
+        onclick="selectTexture('cloud')"
+      >
+        Cloud
+      </button>
     </div>
     <script>
       // Face Mesh Texture Mapping
@@ -58,7 +81,7 @@
       let triangles;
       let uvCoords;
       let img, img_cloud, img_orange;
-      let currentTexture = 'orange';
+      let currentTexture = "orange";
 
       function preload() {
         // Initialize FaceMesh model with a maximum of one face
@@ -66,39 +89,40 @@
 
         // Load the texture images that will be mapped onto the face mesh
         // Using placeholder images since we don't have the actual files
-        img_cloud = createGraphics(200, 200);
-        img_cloud.background(135, 206, 235); // Sky blue
-        img_cloud.fill(255);
-        img_cloud.noStroke();
-        for(let i = 0; i < 20; i++) {
-          img_cloud.ellipse(random(200), random(200), random(30, 60));
-        }
-        
-        img_orange = createGraphics(200, 200);
-        img_orange.background(255, 165, 0); // Orange
-        img_orange.fill(255, 140, 0);
-        img_orange.noStroke();
-        for(let i = 0; i < 15; i++) {
-          img_orange.ellipse(random(200), random(200), random(20, 40));
-        }
-        
+        // img_cloud = createGraphics(200, 200);
+        // img_cloud.background(135, 206, 235); // Sky blue
+        // img_cloud.fill(255);
+        // img_cloud.noStroke();
+        // for(let i = 0; i < 20; i++) {
+        //   img_cloud.ellipse(random(200), random(200), random(30, 60));
+        // }
+
+        // img_orange = createGraphics(200, 200);
+        // img_orange.background(255, 165, 0); // Orange
+        // img_orange.fill(255, 140, 0);
+        // img_orange.noStroke();
+        // for(let i = 0; i < 15; i++) {
+        //   img_orange.ellipse(random(200), random(200), random(20, 40));
+        // }
+        img_cloud = loadImage("clouds.png");
+        img_orange = loadImage("orange.png");
         img = img_orange;
       }
 
       function selectTexture(textureType) {
         currentTexture = textureType;
-        
+
         // Update active button styling
-        document.querySelectorAll('.texture-button').forEach(btn => {
-          btn.classList.remove('active');
+        document.querySelectorAll(".texture-button").forEach((btn) => {
+          btn.classList.remove("active");
         });
-        
-        if (textureType === 'orange') {
+
+        if (textureType === "orange") {
           img = img_orange;
-          document.getElementById('orangeBtn').classList.add('active');
-        } else if (textureType === 'cloud') {
+          document.getElementById("orangeBtn").classList.add("active");
+        } else if (textureType === "cloud") {
           img = img_cloud;
-          document.getElementById('cloudBtn').classList.add('active');
+          document.getElementById("cloudBtn").classList.add("active");
         }
       }
 
@@ -164,24 +188,32 @@
               pointA.x,
               pointA.y,
               uvA[0],
-              uvA[1]
+              uvA[1],
             );
             vertex(
               pointB.x,
               pointB.y,
               uvB[0],
-              uvB[1]
+              uvB[1],
             );
             vertex(
               pointC.x,
               pointC.y,
               uvC[0],
-              uvC[1]
+              uvC[1],
             );
           }
 
           endShape();
         }
+      }
+    
+      function goBack() {
+        // Navigate two levels up in the URL structure
+        const currentPath = window.location.pathname;
+        let parentPath = currentPath.substring(0, currentPath.lastIndexOf('/'));
+        parentPath = parentPath.substring(0, parentPath.lastIndexOf('/'));
+        window.location.href = parentPath || '/';
       }
     </script>
   </body>
