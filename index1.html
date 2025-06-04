@@ -7,14 +7,6 @@
     <link rel="icon" type="image/png" sizes="192x192" href="icon192.png">
     <link rel="icon" type="image/png" sizes="512x512" href="icon512.png">
     <link rel="apple-touch-icon" href="icon192.png">
-    
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#667eea">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="AI Fitness Tracker">
-    
     <!-- Google tag (gtag.js) -->
     <script
       async
@@ -108,55 +100,6 @@
         margin-bottom: 3rem;
         opacity: 0.9;
         line-height: 1.6;
-      }
-
-      .install-prompt {
-        background: rgba(255, 255, 255, 0.15);
-        backdrop-filter: blur(15px);
-        border: 2px solid rgba(255, 255, 255, 0.3);
-        border-radius: 20px;
-        padding: 1.5rem;
-        margin-bottom: 2rem;
-        display: none;
-        animation: slideIn 0.5s ease-out;
-      }
-
-      .install-prompt.show {
-        display: block;
-      }
-
-      @keyframes slideIn {
-        from {
-          opacity: 0;
-          transform: translateY(-20px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      .install-button {
-        background: linear-gradient(45deg, #ff6b6b, #feca57);
-        border: none;
-        border-radius: 15px;
-        padding: 1rem 2rem;
-        color: white;
-        font-size: 1.1rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        margin: 1rem auto;
-        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
-      }
-
-      .install-button:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
       }
 
       .buttons-container {
@@ -273,17 +216,6 @@
         repetition counting. Get instant feedback, track your progress, and
         achieve your fitness goals with cutting-edge AI technology.
       </p>
-      
-      <!-- Install Prompt -->
-      <div class="install-prompt" id="installPrompt">
-        <h3>📱 Install AI Fitness Tracker</h3>
-        <p>Get the full app experience on your device!</p>
-        <button class="install-button" id="installButton">
-          <span id="deviceIcon">📱</span>
-          Install on your device now!
-        </button>
-      </div>
-      
       <div class="buttons-container">
         <a href="/exercises" class="button">
           <div class="button-icon">💪</div>
@@ -350,80 +282,5 @@
         </a>
       </div>
     </div>
-
-    <script>
-      // PWA Install functionality
-      let deferredPrompt;
-      const installPrompt = document.getElementById('installPrompt');
-      const installButton = document.getElementById('installButton');
-      const deviceIcon = document.getElementById('deviceIcon');
-
-      // Detect device type and set appropriate icon
-      function getDeviceIcon() {
-        const userAgent = navigator.userAgent.toLowerCase();
-        const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
-        
-        if (isMobile) {
-          return '📱'; // Mobile phone icon
-        } else {
-          return '💻'; // Laptop icon
-        }
-      }
-
-      // Set device icon
-      deviceIcon.textContent = getDeviceIcon();
-      console.log("got device icon");
-      // Listen for the beforeinstallprompt event
-      window.addEventListener('beforeinstallprompt', (e) => {
-        console.log('PWA install prompt available');
-        // Prevent the mini-infobar from appearing on mobile
-        e.preventDefault();
-        // Stash the event so it can be triggered later
-        deferredPrompt = e;
-        // Show the install prompt
-        installPrompt.classList.add('show');
-      });
-
-      // Handle install button click
-      installButton.addEventListener('click', async () => {
-        if (deferredPrompt) {
-          // Show the install prompt
-          deferredPrompt.prompt();
-          // Wait for the user to respond to the prompt
-          const { outcome } = await deferredPrompt.userChoice;
-          console.log(`User response to the install prompt: ${outcome}`);
-          // Clear the deferredPrompt variable
-          deferredPrompt = null;
-          // Hide the install prompt
-          installPrompt.classList.remove('show');
-        }
-      });
-
-      // Listen for the app to be installed
-      window.addEventListener('appinstalled', (evt) => {
-        console.log('PWA was installed');
-        installPrompt.classList.remove('show');
-      });
-
-      // Check if app is already installed (running in standalone mode)
-      if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
-        console.log('PWA is running in standalone mode');
-        // Hide install prompt if already installed
-        installPrompt.style.display = 'none';
-      }
-
-      // Register service worker
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js')
-            .then((registration) => {
-              console.log('SW registered: ', registration);
-            })
-            .catch((registrationError) => {
-              console.log('SW registration failed: ', registrationError);
-            });
-        });
-      }
-    </script>
   </body>
 </html>
