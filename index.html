@@ -152,7 +152,7 @@
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
-        animation: gradient 3s ease infinite;
+        animation: gradient 1s ease infinite;
       }
 
       @keyframes gradient {
@@ -174,15 +174,22 @@
         line-height: 1.6;
       }
 
-      .install-prompt {
-        background: rgba(255, 255, 255, 0.15);
-        backdrop-filter: blur(15px);
+      .install-prompt { 
+        background: linear-gradient(
+          45deg,
+          #ff6b6b,
+          #feca57,
+          #48dbfb,
+          #ff9ff3
+        );
+        backdrop-filter: blur(1px);
         border: 2px solid rgba(255, 255, 255, 0.3);
         border-radius: 20px;
         padding: 1.5rem;
         margin-bottom: 2rem;
         display: none;
-        animation: slideIn 0.5s ease-out;
+        /* animation: slideIn 0.5s ease-out,  */
+        animation: gradient 1s ease infinite;
       }
 
       .install-prompt.show {
