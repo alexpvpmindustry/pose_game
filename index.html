@@ -7,14 +7,78 @@
     <link rel="icon" type="image/png" sizes="192x192" href="icon192.png">
     <link rel="icon" type="image/png" sizes="512x512" href="icon512.png">
     <link rel="apple-touch-icon" href="icon192.png">
-    
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+      AI Fitness Tracker - Real-Time Pose Detection & Rep Counting | Smart
+      Workout App
+    </title>
+    <meta
+      name="description"
+      content="Transform your workouts with AI-powered pose detection and intelligent repetition counting. Get real-time feedback, track progress, and achieve fitness goals with cutting-edge computer vision technology."
+    >
+    <meta
+      name="keywords"
+      content="AI fitness tracker, pose detection, rep counter, workout app, exercise tracking, computer vision fitness, smart fitness, real-time exercise feedback, fitness technology, ML5 fitness"
+    >
+    <meta name="author" content="AI Fitness Tracker">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://pose.ddns.net/">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://pose.ddns.net/">
+    <meta
+      property="og:title"
+      content="AI Fitness Tracker - Real-Time Pose Detection & Rep Counting"
+    >
+    <meta
+      property="og:description"
+      content="Transform your workouts with AI-powered pose detection and intelligent repetition counting. Get real-time feedback and achieve your fitness goals."
+    >
+    <meta property="og:image" content="https://pose.ddns.net/icon512.png">
+    <meta property="og:image:width" content="512">
+    <meta property="og:image:height" content="512">
+    <meta property="og:site_name" content="AI Fitness Tracker">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://pose.ddns.net/">
+    <meta
+      property="twitter:title"
+      content="AI Fitness Tracker - Real-Time Pose Detection & Rep Counting"
+    >
+    <meta
+      property="twitter:description"
+      content="Transform your workouts with AI-powered pose detection and intelligent repetition counting. Get real-time feedback and achieve your fitness goals."
+    >
+    <meta property="twitter:image" content="https://pose.ddns.net/icon512.png">
+
+    <!-- Icons -->
+    <link rel="icon" type="image/png" sizes="192x192" href="icon192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icon512.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="icon192.png">
+
     <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#667eea">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    >
     <meta name="apple-mobile-web-app-title" content="AI Fitness Tracker">
-    
+    <meta name="application-name" content="AI Fitness Tracker">
+    <meta name="msapplication-TileColor" content="#667eea">
+    <meta name="msapplication-config" content="browserconfig.xml">
+
+    <!-- Additional SEO -->
+    <meta name="format-detection" content="telephone=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="preconnect" href="https://www.googletagmanager.com">
+    <link rel="dns-prefetch" href="https://www.google-analytics.com">
+
     <!-- Google tag (gtag.js) -->
     <script
       async
@@ -273,7 +337,7 @@
         repetition counting. Get instant feedback, track your progress, and
         achieve your fitness goals with cutting-edge AI technology.
       </p>
-      
+
       <!-- Install Prompt -->
       <div class="install-prompt" id="installPrompt">
         <h3>📱 Install AI Fitness Tracker</h3>
@@ -283,7 +347,7 @@
           Install on your device now!
         </button>
       </div>
-      
+
       <div class="buttons-container">
         <a href="/exercises" class="button">
           <div class="button-icon">💪</div>
@@ -354,19 +418,21 @@
     <script>
       // PWA Install functionality
       let deferredPrompt;
-      const installPrompt = document.getElementById('installPrompt');
-      const installButton = document.getElementById('installButton');
-      const deviceIcon = document.getElementById('deviceIcon');
+      const installPrompt = document.getElementById("installPrompt");
+      const installButton = document.getElementById("installButton");
+      const deviceIcon = document.getElementById("deviceIcon");
 
       // Detect device type and set appropriate icon
       function getDeviceIcon() {
         const userAgent = navigator.userAgent.toLowerCase();
-        const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
-        
+        const isMobile =
+          /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i
+            .test(userAgent);
+
         if (isMobile) {
-          return '📱'; // Mobile phone icon
+          return "📱"; // Mobile phone icon
         } else {
-          return '💻'; // Laptop icon
+          return "💻"; // Laptop icon
         }
       }
 
@@ -374,53 +440,61 @@
       deviceIcon.textContent = getDeviceIcon();
       console.log("got device icon");
       // Listen for the beforeinstallprompt event
-      window.addEventListener('beforeinstallprompt', (e) => {
-        console.log('PWA install prompt available');
+      window.addEventListener("beforeinstallprompt", (e) => {
+        console.log("PWA install prompt available");
         // Prevent the mini-infobar from appearing on mobile
         e.preventDefault();
         // Stash the event so it can be triggered later
         deferredPrompt = e;
         // Show the install prompt
-        installPrompt.classList.add('show');
+        installPrompt.classList.add("show");
       });
 
       // Handle install button click
-      installButton.addEventListener('click', async () => {
+      installButton.addEventListener("click", async () => {
         if (deferredPrompt) {
           // Show the install prompt
           deferredPrompt.prompt();
           // Wait for the user to respond to the prompt
           const { outcome } = await deferredPrompt.userChoice;
-          console.log(`User response to the install prompt: ${outcome}`);
+          console.log(
+            `User response to the install prompt: ${outcome}`,
+          );
           // Clear the deferredPrompt variable
           deferredPrompt = null;
           // Hide the install prompt
-          installPrompt.classList.remove('show');
+          installPrompt.classList.remove("show");
         }
       });
 
       // Listen for the app to be installed
-      window.addEventListener('appinstalled', (evt) => {
-        console.log('PWA was installed');
-        installPrompt.classList.remove('show');
+      window.addEventListener("appinstalled", (evt) => {
+        console.log("PWA was installed");
+        installPrompt.classList.remove("show");
       });
 
       // Check if app is already installed (running in standalone mode)
-      if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
-        console.log('PWA is running in standalone mode');
+      if (
+        window.matchMedia("(display-mode: standalone)").matches ||
+        window.navigator.standalone
+      ) {
+        console.log("PWA is running in standalone mode");
         // Hide install prompt if already installed
-        installPrompt.style.display = 'none';
+        installPrompt.style.display = "none";
       }
 
       // Register service worker
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js')
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("/sw.js")
             .then((registration) => {
-              console.log('SW registered: ', registration);
+              console.log("SW registered: ", registration);
             })
             .catch((registrationError) => {
-              console.log('SW registration failed: ', registrationError);
+              console.log(
+                "SW registration failed: ",
+                registrationError,
+              );
             });
         });
       }
