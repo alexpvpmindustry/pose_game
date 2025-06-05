@@ -28,3 +28,8 @@ hello
 [testing no js](https://alexpvpmindustry.github.io/pose_game/test/index_no_js.html)
 
 [rush hour game](https://alexpvpmindustry.github.io/pose_game/move_block3/index.html)
+
+SSD https://s.shopee.sg/8AK5w4yODW 
+
+Massager https://s.shopee.sg/5fckxawLfn 
+
