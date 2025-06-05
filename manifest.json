@@ -1,7 +1,7 @@
 {
   "name": "AI Fitness Tracker",
   "short_name": "AI Fitness",
-  "description": "Transform your workout with real-time pose detection and intelligent repetition counting",
+  "description": "Transform your workout with real-time pose detection and intelligent repetition counting ",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#667eea",
