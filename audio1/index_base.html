@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whisper Speech Recognition - Static HTML</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        #recordBtn {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+        }
+        
+        #stopBtn {
+            background: linear-gradient(45deg, #7bed9f, #2ed573);
+            color: white;
+        }
+        
+        #transcribeBtn {
+            background: linear-gradient(45deg, #5352ed, #40407a);
+            color: white;
+        }
+        
+        select {
+            padding: 10px;
+            border-radius: 10px;
+            border: none;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+        }
+        
+        .status {
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+        }
+        
+        #transcript {
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            padding: 20px;
+            border-radius: 15px;
+            min-height: 100px;
+            margin-top: 20px;
+            font-size: 16px;
+            line-height: 1.6;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error {
+            background: rgba(255, 0, 0, 0.2);
+            border: 1px solid rgba(255, 0, 0, 0.5);
+            color: #ffcccc;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+        
+        .info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎤 Whisper Speech Recognition Base</h1>
+        
+        <div class="info">
+            <strong>🚀 Features:</strong> Record audio directly in your browser and transcribe it using Whisper AI - completely offline! 
+            Supports Chinese (Mandarin), Cantonese, and many other languages.
+        </div>
+        
+        <div class="controls">
+            <button id="recordBtn">🎤 Start Recording</button>
+            <button id="stopBtn" disabled>⏹️ Stop Recording</button>
+            <select id="languageSelect">
+                <option value="auto">Auto Detect</option>
+                <option value="zh">Chinese (Mandarin)</option>
+                <option value="yue">Cantonese</option>
+                <option value="en">English</option>
+                <option value="ja">Japanese</option>
+                <option value="ko">Korean</option>
+            </select>
+            <button id="transcribeBtn" disabled>✨ Transcribe Audio</button>
+        </div>
+        
+        <div class="status" id="status">Ready to record. Click "Start Recording" to begin.</div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <div>Loading Whisper model... This may take a moment on first use.</div>
+        </div>
+        
+        <div id="transcript">Your transcribed text will appear here...</div>
+    </div>
+
+    <script type="module">
+        let mediaRecorder;
+        let audioChunks = [];
+        let pipeline;
+        let isModelLoaded = false;
+
+        const recordBtn = document.getElementById('recordBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const transcribeBtn = document.getElementById('transcribeBtn');
+        const status = document.getElementById('status');
+        const transcript = document.getElementById('transcript');
+        const loading = document.getElementById('loading');
+        const languageSelect = document.getElementById('languageSelect');
+
+        // Load Whisper model using Hugging Face Transformers.js
+        async function loadModel() {
+            if (isModelLoaded) return;
+            
+            try {
+                loading.style.display = 'block';
+                status.textContent = 'Loading Whisper model...';
+                
+                // Import the transformers library
+                const { pipeline: createPipeline } = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/transformers.min.js');
+                
+                // Create pipeline with a smaller model for faster loading
+                pipeline = await createPipeline(
+                    'automatic-speech-recognition',
+                    'Xenova/whisper-base',
+                    { 
+                        dtype: 'fp32',
+                        device: 'webgpu' // Use WebGPU if available, fallback to CPU
+                    }
+                );
+                
+                isModelLoaded = true;
+                status.textContent = 'Model loaded! Ready to record.';
+                loading.style.display = 'none';
+                
+            } catch (error) {
+                console.error('Error loading model:', error);
+                loading.style.display = 'none';
+                showError('Failed to load Whisper model. Please refresh and try again.');
+            }
+        }
+
+        // Start recording
+        recordBtn.addEventListener('click', async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: {
+                        sampleRate: 16000,
+                        channelCount: 1,
+                        echoCancellation: true,
+                        noiseSuppression: true
+                    } 
+                });
+                
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) {
+                        audioChunks.push(event.data);
+                    }
+                };
+                
+                mediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    processAudio(audioBlob);
+                    stream.getTracks().forEach(track => track.stop());
+                };
+                
+                mediaRecorder.start();
+                recordBtn.disabled = true;
+                stopBtn.disabled = false;
+                status.textContent = '🔴 Recording... Speak clearly into your microphone.';
+                
+            } catch (error) {
+                console.error('Error accessing microphone:', error);
+                showError('Could not access microphone. Please check permissions.');
+            }
+        });
+
+        // Stop recording
+        stopBtn.addEventListener('click', () => {
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.stop();
+                recordBtn.disabled = false;
+                stopBtn.disabled = true;
+                status.textContent = 'Recording stopped. Ready to transcribe.';
+            }
+        });
+
+        // Process recorded audio
+        async function processAudio(audioBlob) {
+            try {
+                transcribeBtn.disabled = false;
+                
+                // Convert blob to audio buffer
+                const arrayBuffer = await audioBlob.arrayBuffer();
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+                
+                // Store audio data for transcription
+                window.recordedAudio = audioBuffer;
+                
+            } catch (error) {
+                console.error('Error processing audio:', error);
+                showError('Error processing recorded audio.');
+            }
+        }
+
+        // Transcribe audio
+        transcribeBtn.addEventListener('click', async () => {
+            if (!window.recordedAudio) {
+                showError('No audio recorded. Please record some audio first.');
+                return;
+            }
+            
+            if (!isModelLoaded) {
+                await loadModel();
+            }
+            
+            try {
+                loading.style.display = 'block';
+                status.textContent = 'Transcribing audio...';
+                transcribeBtn.disabled = true;
+                
+                // Convert audio buffer to the format expected by Whisper
+                const audioData = window.recordedAudio.getChannelData(0);
+                
+                // Set up transcription options
+                const language = languageSelect.value;
+                const options = {};
+                
+                if (language !== 'auto') {
+                    options.language = language;
+                }
+                
+                // Transcribe
+                const result = await pipeline(audioData, options);
+                
+                // Display result
+                transcript.innerHTML = `
+                    <strong>Transcribed Text:</strong><br><br>
+                    ${result.text || 'No speech detected in the audio.'}
+                `;
+                
+                status.textContent = 'Transcription complete!';
+                loading.style.display = 'none';
+                transcribeBtn.disabled = false;
+                
+            } catch (error) {
+                console.error('Error during transcription:', error);
+                loading.style.display = 'none';
+                transcribeBtn.disabled = false;
+                showError('Transcription failed. Please try again.');
+            }
+        });
+
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.textContent = message;
+            document.querySelector('.container').insertBefore(errorDiv, transcript);
+            
+            setTimeout(() => {
+                errorDiv.remove();
+            }, 5000);
+        }
+
+        // Load model on page load for better UX
+        window.addEventListener('load', () => {
+            loadModel();
+        });
+    </script>
+</body>
+</html>

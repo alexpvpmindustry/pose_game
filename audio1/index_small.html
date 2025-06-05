@@ -141,7 +141,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>🎤 Whisper Speech Recognition</h1>
+        <h1>🎤 Whisper Speech Recognition small</h1>
         
         <div class="info">
             <strong>🚀 Features:</strong> Record audio directly in your browser and transcribe it using Whisper AI - completely offline! 
@@ -200,7 +200,7 @@
                 // Create pipeline with a smaller model for faster loading
                 pipeline = await createPipeline(
                     'automatic-speech-recognition',
-                    'Xenova/whisper-tiny',
+                    'Xenova/whisper-small',
                     { 
                         dtype: 'fp32',
                         device: 'webgpu' // Use WebGPU if available, fallback to CPU
