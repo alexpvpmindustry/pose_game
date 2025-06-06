@@ -33,6 +33,10 @@ function gotCommand(error, results) {
 
 function draw() {
   background(0);
+  textSize(24);
+  textAlign(CENTER);
+  fill(255);
+  text("Say: up, down, left, right, go, stop", width/2, height - 30);
 
   // Draw and update text animations
   for (let i = textAnimations.length - 1; i >= 0; i--) {
