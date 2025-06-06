@@ -33,17 +33,27 @@ function setup() {
   createCanvas(400, 400);
   soundClassifier.classify(onNewSoundClassified);
   noLoop();
-  // Initialize unicorn position at center
-  unicornX = width / 2;
-  unicornY = height / 2;
-  // Place initial ball
-  placeBall();
+  // Initialize unicorn position at center of grid
+  unicornX = floor(width / GRID_SIZE / 2) * GRID_SIZE + GRID_SIZE/2;
+  unicornY = floor(height / GRID_SIZE / 2) * GRID_SIZE + GRID_SIZE/2;
 }
 
 function placeBall() {
-  // Place ball at random grid position
-  ballX = floor(random(width / GRID_SIZE)) * GRID_SIZE + GRID_SIZE/2;
-  ballY = floor(random(height / GRID_SIZE)) * GRID_SIZE + GRID_SIZE/2;
+  // Calculate number of cells in each dimension
+  const numCellsX = floor(width / GRID_SIZE);
+  const numCellsY = floor(height / GRID_SIZE);
+  
+  // Get random cell coordinates
+  const cellX = floor(random(numCellsX));
+  const cellY = floor(random(numCellsY));
+  
+  // Calculate ball position to be centered in the cell
+  ballX = (cellX * GRID_SIZE) + (GRID_SIZE / 2);
+  ballY = (cellY * GRID_SIZE) + (GRID_SIZE / 2);
+  
+  // Ensure ball stays within canvas boundaries
+  ballX = constrain(ballX, GRID_SIZE/2, width - GRID_SIZE/2);
+  ballY = constrain(ballY, GRID_SIZE/2, height - GRID_SIZE/2);
 }
 
 function draw() {
@@ -78,6 +88,11 @@ function draw() {
   // Display score
   textAlign(RIGHT);
   text('Score: ' + score, width - 10, height - 20);
+  
+  // Place initial ball if it hasn't been placed yet
+  if (typeof ballX === 'undefined' || typeof ballY === 'undefined') {
+    placeBall();
+  }
 }
 
 function checkCollision() {
@@ -126,5 +141,30 @@ function onNewSoundClassified(error, results){
     checkCollision();
   }
   
+  redraw();
+}
+
+function keyPressed() {
+  const moveDistance = 50;
+  const unicornWidth = unicornImg.width/3;
+  const unicornHeight = unicornImg.height/3;
+  
+  switch(keyCode) {
+    case UP_ARROW:
+      unicornY = max(unicornHeight/2, unicornY - moveDistance);
+      break;
+    case DOWN_ARROW:
+      unicornY = min(height - unicornHeight/2, unicornY + moveDistance);
+      break;
+    case LEFT_ARROW:
+      unicornX = max(unicornWidth/2, unicornX - moveDistance);
+      break;
+    case RIGHT_ARROW:
+      unicornX = min(width - unicornWidth/2, unicornX + moveDistance);
+      break;
+  }
+  
+  // Check for collision after movement
+  checkCollision();
   redraw();
 }
