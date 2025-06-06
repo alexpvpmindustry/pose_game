@@ -59,7 +59,7 @@ function keyPressed() {
 }
 
 function draw() {
-  if (random(1) < 0.005) {
+  if (random(1) < 0.004) {
     trains.push(new Train());
   }
 
@@ -76,7 +76,7 @@ function draw() {
   // Draw and update text animations
   for (let i = textAnimations.length - 1; i >= 0; i--) {
     let anim = textAnimations[i];
-    textSize(32);
+    textSize(60);
     textAlign(CENTER);
     fill(255, anim.alpha);
     text(anim.text, anim.x, anim.y);

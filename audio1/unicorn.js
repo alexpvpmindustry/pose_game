@@ -9,7 +9,7 @@
 class Unicorn {
   
   constructor() {
-    this.r = 120;
+    this.r = 50;
     this.x = 50;
     this.y = height - this.r;
     this.vy = 0;
