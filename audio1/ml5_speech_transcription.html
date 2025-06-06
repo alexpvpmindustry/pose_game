@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ml5.js Speech Transcription</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ml5/0.12.2/ml5.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        .controls {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 5px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .status {
+            text-align: center;
+            margin: 20px 0;
+            font-weight: bold;
+            color: #666;
+        }
+        
+        .status.listening {
+            color: #4CAF50;
+        }
+        
+        .status.error {
+            color: #f44336;
+        }
+        
+        .transcript-box {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            min-height: 200px;
+            margin: 20px 0;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .interim {
+            color: #888;
+            font-style: italic;
+        }
+        
+        .final {
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .confidence {
+            font-size: 12px;
+            color: #666;
+            margin-left: 10px;
+        }
+        
+        .instructions {
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎤 ml5.js Speech Transcription</h1>
+        
+        <div class="instructions">
+            <strong>Instructions:</strong>
+            <ul>
+                <li>Click "Start Listening" to begin speech recognition</li>
+                <li>Speak clearly into your microphone</li>
+                <li>Gray italic text shows interim results</li>
+                <li>Black text shows final transcriptions</li>
+                <li>Click "Stop Listening" to end the session</li>
+            </ul>
+        </div>
+        
+        <div class="controls">
+            <button id="startBtn" onclick="startListening()">Start Listening</button>
+            <button id="stopBtn" onclick="stopListening()" disabled>Stop Listening</button>
+            <button onclick="clearTranscript()">Clear</button>
+        </div>
+        
+        <div id="status" class="status">Ready to start</div>
+        
+        <div id="transcript" class="transcript-box">
+            Transcribed speech will appear here...
+        </div>
+    </div>
+
+    <script>
+        let speechRec;
+        let isListening = false;
+        let transcript = '';
+        
+        function setup() {
+            // Create speech recognition object
+            speechRec = new ml5.speechRecognition();
+            
+            // Set language to English
+            speechRec.lang = 'en-US';
+            
+            // Enable interim results (partial transcriptions)
+            speechRec.interimResults = true;
+            
+            // Enable continuous listening
+            speechRec.continuous = true;
+            
+            // Set up event handlers
+            speechRec.onStart = handleStart;
+            speechRec.onEnd = handleEnd;
+            speechRec.onResult = handleResult;
+            speechRec.onError = handleError;
+            
+            updateStatus('Speech recognition initialized. Ready to start.');
+        }
+        
+        function startListening() {
+            if (!isListening) {
+                speechRec.start();
+                isListening = true;
+                document.getElementById('startBtn').disabled = true;
+                document.getElementById('stopBtn').disabled = false;
+                updateStatus('Starting...', 'listening');
+            }
+        }
+        
+        function stopListening() {
+            if (isListening) {
+                speechRec.stop();
+                isListening = false;
+                document.getElementById('startBtn').disabled = false;
+                document.getElementById('stopBtn').disabled = true;
+                updateStatus('Stopped listening');
+            }
+        }
+        
+        function clearTranscript() {
+            transcript = '';
+            document.getElementById('transcript').innerHTML = 'Transcribed speech will appear here...';
+        }
+        
+        function handleStart() {
+            updateStatus('🎤 Listening... Speak now!', 'listening');
+        }
+        
+        function handleEnd() {
+            updateStatus('Stopped listening');
+            isListening = false;
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
+        }
+        
+        function handleResult() {
+            let resultText = '';
+            let interimText = '';
+            
+            // Process all results
+            for (let i = 0; i < speechRec.resultString.length; i++) {
+                const result = speechRec.resultString[i];
+                const confidence = speechRec.resultConfidence[i];
+                
+                if (result.isFinal) {
+                    resultText += `<span class="final">${result.transcript}</span>`;
+                    if (confidence) {
+                        resultText += `<span class="confidence">(${Math.round(confidence * 100)}%)</span>`;
+                    }
+                    resultText += '<br>';
+                } else {
+                    interimText += `<span class="interim">${result.transcript}</span>`;
+                }
+            }
+            
+            // Update transcript display
+            const transcriptDiv = document.getElementById('transcript');
+            transcriptDiv.innerHTML = transcript + resultText + interimText;
+            
+            // Save final results to persistent transcript
+            if (resultText) {
+                transcript += resultText;
+            }
+            
+            // Auto-scroll to bottom
+            transcriptDiv.scrollTop = transcriptDiv.scrollHeight;
+        }
+        
+        function handleError(error) {
+            console.error('Speech recognition error:', error);
+            updateStatus(`Error: ${error}`, 'error');
+            isListening = false;
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
+        }
+        
+        function updateStatus(message, className = '') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = 'status ' + className;
+        }
+        
+        // Initialize when page loads
+        window.addEventListener('load', setup);
+        
+        // Handle browser compatibility
+        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+            updateStatus('Speech recognition not supported in this browser', 'error');
+            document.getElementById('startBtn').disabled = true;
+        }
+    </script>
+</body>
+</html>
