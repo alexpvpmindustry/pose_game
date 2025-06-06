@@ -20,7 +20,7 @@ let unicornY;
 let ballX;
 let ballY;
 let score = 0;
-const GRID_SIZE = 50; // Match the movement distance
+const GRID_SIZE = 75; // Increased from 50 to 75 (50% larger)
 
 function preload(){
   // the default probabilityThreshold is 0
@@ -30,7 +30,15 @@ function preload(){
 }
 
 function setup() {
-  createCanvas(400, 400);
+  let canvas = createCanvas(600, 600);
+  // Center the canvas on the screen
+  canvas.style('display', 'block');
+  canvas.style('margin', 'auto');
+  canvas.style('position', 'absolute');
+  canvas.style('top', '50%');
+  canvas.style('left', '50%');
+  canvas.style('transform', 'translate(-50%, -50%)');
+  
   soundClassifier.classify(onNewSoundClassified);
   noLoop();
   // Initialize unicorn position at center of grid
@@ -67,27 +75,28 @@ function draw() {
   // Draw target ball
   fill(255, 0, 0);
   noStroke();
-  circle(ballX, ballY, 20);
+  circle(ballX, ballY, 30); // Increased from 20 to 30
   
   // Display the recognized command
-  fill(0, 240, 0);
+  fill(100, 202, 0);
   if(classificationResults){
-    textSize(32);
+    textSize(48);
     textStyle(BOLD);
-    let strWidth = textWidth(classificationResults[0].label);
-    text(classificationResults[0].label, width / 2 - strWidth / 2, height - 50);
+    textAlign(CENTER);
+    let commandText = classificationResults[0].label + ' (' + classificationResults[0].confidence.toFixed(4) + ')';
+    text(commandText, width/2, height - 75);
   }
   
   // Display frame count and frame rate
   fill(0, 240, 0);
-  textSize(16);
+  textSize(24); // Increased from 16 to 24
   textAlign(LEFT);
-  text('Frame Count: ' + frameCount, 10, height - 40);
-  text('Frame Rate: ' + nf(frameRate(), 0, 2), 10, height - 20);
+  text('Frame Count: ' + frameCount, 15, height - 60); // Adjusted position
+  text('Frame Rate: ' + nf(frameRate(), 0, 2), 15, height - 30); // Adjusted position
   
   // Display score
   textAlign(RIGHT);
-  text('Score: ' + score, width - 10, height - 20);
+  text('Score: ' + score, width - 15, height - 30); // Adjusted position
   
   // Place initial ball if it hasn't been placed yet
   if (typeof ballX === 'undefined' || typeof ballY === 'undefined') {
@@ -118,7 +127,7 @@ function onNewSoundClassified(error, results){
   // Update unicorn position based on voice command
   if (results && results[0].confidence > 0.8) {
     const command = results[0].label;
-    const moveDistance = 50; // Move 50 pixels per command
+    const moveDistance = 75; // Increased from 50 to 75
     const unicornWidth = unicornImg.width/3;
     const unicornHeight = unicornImg.height/3;
     
@@ -145,7 +154,7 @@ function onNewSoundClassified(error, results){
 }
 
 function keyPressed() {
-  const moveDistance = 50;
+  const moveDistance = 75; // Increased from 50 to 75
   const unicornWidth = unicornImg.width/3;
   const unicornHeight = unicornImg.height/3;
   
